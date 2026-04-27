@@ -1,0 +1,11 @@
+{
+  "rooms": [
+    { "id": "lobby", "connects_to": ["lounge"] },
+    { "id": "lounge", "connects_to": ["lobby", "roof"] },
+    { "id": "roof", "connects_to": ["lounge"] }
+  ],
+  "edges": [
+    { "from": "lobby", "to": "lounge", "type": "portal" },
+    { "from": "lounge", "to": "roof", "type": "elevator" }
+  ]
+}

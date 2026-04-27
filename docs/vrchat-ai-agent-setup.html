@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VRChat AI Pipeline — Codex + Antigravity 셋업</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --s1: #161b24;
+      --s2: #1c2333;
+      --s3: #232d3f;
+      --border: #2a3548;
+      --text: #e6edf3;
+      --muted: #8b949e;
+      --faint: #495568;
+      --cyan: #58d4e8;
+      --green: #7ce38b;
+      --yellow: #e3b341;
+      --orange: #ffa657;
+      --purple: #bc8cff;
+      --red: #ff7b72;
+      --codex: #58d4e8;
+      --anti: #bc8cff;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+      font-size: 15px;
+    }
+    a { color: var(--cyan); text-decoration: none; }
+
+    /* LAYOUT */
+    .page { max-width: 1100px; margin: 0 auto; padding: 40px 20px 100px; }
+    .hero {
+      padding: 36px 32px;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      background: linear-gradient(135deg, rgba(88,212,232,.08) 0%, rgba(188,140,255,.06) 100%), var(--s1);
+      margin-bottom: 32px;
+    }
+    .hero-eyebrow { color: var(--cyan); font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 10px; }
+    .hero h1 { font-size: clamp(1.8rem, 4vw, 3rem); font-weight: 800; margin-bottom: 12px; }
+    .hero p { color: var(--muted); max-width: 680px; }
+    .agents { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 20px; }
+    .agent-badge {
+      padding: 12px 16px; border-radius: 14px; border: 1px solid var(--border);
+      display: flex; align-items: center; gap: 12px;
+    }
+    .agent-badge .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .codex-dot { background: var(--codex); box-shadow: 0 0 8px var(--codex); }
+    .anti-dot { background: var(--anti); box-shadow: 0 0 8px var(--anti); }
+    .agent-badge strong { color: var(--text); font-size: 15px; }
+    .agent-badge span { color: var(--muted); font-size: 13px; display: block; }
+
+    /* SECTIONS */
+    section { margin-bottom: 28px; }
+    .section-title {
+      font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+      color: var(--faint); margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid var(--border);
+    }
+    .card {
+      background: var(--s1); border: 1px solid var(--border); border-radius: 16px; padding: 22px;
+    }
+    .card + .card { margin-top: 12px; }
+    h2 { font-size: 1.15rem; font-weight: 700; margin-bottom: 8px; }
+    h3 { font-size: 1rem; font-weight: 700; margin-bottom: 6px; }
+    p { color: var(--muted); margin-bottom: 10px; }
+    p:last-child { margin-bottom: 0; }
+    ul { color: var(--muted); padding-left: 20px; }
+    li { margin-bottom: 5px; }
+    li strong { color: var(--text); }
+    .tag {
+      display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 700;
+      margin-right: 6px; margin-bottom: 4px;
+    }
+    .tag-codex { background: rgba(88,212,232,.15); color: var(--codex); border: 1px solid rgba(88,212,232,.2); }
+    .tag-anti { background: rgba(188,140,255,.15); color: var(--anti); border: 1px solid rgba(188,140,255,.2); }
+    .tag-both { background: rgba(124,227,139,.15); color: var(--green); border: 1px solid rgba(124,227,139,.2); }
+
+    /* ROLE GRID */
+    .role-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 12px; }
+    .role-card {
+      background: var(--s1); border: 1px solid var(--border); border-radius: 16px; padding: 18px;
+    }
+    .role-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .role-num {
+      width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center;
+      font-weight: 800; font-size: 14px; flex-shrink: 0;
+    }
+    .role-num.codex { background: rgba(88,212,232,.15); color: var(--codex); }
+    .role-num.anti { background: rgba(188,140,255,.15); color: var(--anti); }
+    .role-num.both { background: rgba(124,227,139,.15); color: var(--green); }
+    .role-name { font-weight: 700; font-size: 15px; }
+    .role-sub { font-size: 12px; color: var(--muted); }
+
+    /* CODE BLOCKS */
+    .code-block {
+      background: #0a0e14; border: 1px solid var(--border); border-radius: 12px;
+      overflow: hidden; margin: 12px 0;
+    }
+    .code-header {
+      background: var(--s2); padding: 8px 14px; font-size: 12px; color: var(--muted);
+      font-weight: 600; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;
+    }
+    .code-header .lang { color: var(--faint); }
+    pre {
+      padding: 16px; overflow-x: auto; font-size: 13px; line-height: 1.6;
+      font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+      color: #c9d1d9; white-space: pre;
+    }
+    .c-comment { color: #6e7681; }
+    .c-key { color: #ff7b72; }
+    .c-str { color: #a5d6ff; }
+    .c-num { color: #79c0ff; }
+    .c-fn { color: #d2a8ff; }
+    .c-sys { color: #7ce38b; }
+    .c-tag { color: var(--orange); }
+    .c-prompt { color: #e3b341; }
+
+    /* PIPELINE FLOW */
+    .flow { display: grid; gap: 8px; }
+    .flow-row {
+      display: grid; grid-template-columns: 100px 1fr; gap: 0;
+      border: 1px solid var(--border); border-radius: 12px; overflow: hidden;
+    }
+    .flow-label {
+      padding: 12px 14px; display: flex; align-items: center; justify-content: center; text-align: center;
+      font-size: 12px; font-weight: 700; flex-direction: column; gap: 4px;
+    }
+    .flow-label.codex { background: rgba(88,212,232,.08); color: var(--codex); }
+    .flow-label.anti { background: rgba(188,140,255,.08); color: var(--anti); }
+    .flow-label.both { background: rgba(124,227,139,.08); color: var(--green); }
+    .flow-content { padding: 12px 16px; border-left: 1px solid var(--border); background: var(--s1); }
+    .flow-content strong { color: var(--text); }
+    .flow-content p { color: var(--muted); font-size: 13px; margin: 4px 0 0; }
+
+    /* PROMPT BOX */
+    .prompt-box {
+      background: #0a0e14; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin: 12px 0;
+    }
+    .prompt-header {
+      background: var(--s2); padding: 8px 14px; font-size: 12px; font-weight: 700; color: var(--muted);
+      border-bottom: 1px solid var(--border);
+    }
+    .prompt-body {
+      padding: 16px; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #e3b341;
+      white-space: pre-wrap; line-height: 1.7;
+    }
+
+    /* TABS */
+    .tabs { display: flex; gap: 4px; margin-bottom: 14px; flex-wrap: wrap; }
+    .tab {
+      padding: 7px 16px; border-radius: 8px; border: 1px solid var(--border);
+      font-size: 13px; font-weight: 600; cursor: pointer; color: var(--muted);
+      background: var(--s1); transition: all .15s;
+    }
+    .tab:hover { color: var(--text); }
+    .tab.active-codex { background: rgba(88,212,232,.1); color: var(--codex); border-color: rgba(88,212,232,.3); }
+    .tab.active-anti { background: rgba(188,140,255,.1); color: var(--anti); border-color: rgba(188,140,255,.3); }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* DIVIDER */
+    .divider { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+
+    @media (max-width: 700px) {
+      .agents, .role-grid { grid-template-columns: 1fr; }
+      .flow-row { grid-template-columns: 80px 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-eyebrow">VRChat × AI Multi-Agent Setup</div>
+    <h1>Codex + Antigravity<br>역할 분담 파이프라인</h1>
+    <p>Codex CLI는 파일 시스템 자동화·Unity 편입·Udon 로직 생성을 담당하고, Antigravity는 에이전트 플로우 오케스트레이션·브라우저 QA·플랜 검증을 담당합니다.</p>
+    <div class="agents">
+      <div class="agent-badge">
+        <div class="dot codex-dot"></div>
+        <div>
+          <strong>Codex CLI</strong>
+          <span>터미널 에이전트 — 코드 생성, 파일 조작, Unity 자동화, bash 실행</span>
+        </div>
+      </div>
+      <div class="agent-badge">
+        <div class="dot anti-dot"></div>
+        <div>
+          <strong>Antigravity</strong>
+          <span>에이전트 오케스트레이터 — 플랜 검증, 브라우저, 비주얼 QA, 멀티에이전트 매니저</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROLE MAP -->
+  <section>
+    <div class="section-title">역할 분담 지도</div>
+    <div class="role-grid">
+
+      <div class="role-card">
+        <div class="role-header">
+          <div class="role-num codex">01</div>
+          <div>
+            <div class="role-name">월드 스펙 파싱</div>
+            <div class="role-sub"><span class="tag tag-codex">Codex</span>플래너 에이전트</div>
+          </div>
+        </div>
+        <p>유저 프롬프트 → <code>world_spec.json</code>, <code>room_graph.json</code>, <code>asset_manifest.json</code> 자동 생성. Codex CLI가 Python 스크립트로 구조화된 JSON 산출.</p>
+      </div>
+
+      <div class="role-card">
+        <div class="role-header">
+          <div class="role-num anti">02</div>
+          <div>
+            <div class="role-name">아키텍처 플랜 검증</div>
+            <div class="role-sub"><span class="tag tag-anti">Antigravity</span>플랜 에이전트</div>
+          </div>
+        </div>
+        <p>Codex가 뽑은 스펙을 Antigravity가 Implementation Plan 아티팩트로 변환. 사람이 승인 후 진행. 비일관성·빠진 인터랙션·성능 과부하 위험 탐지.</p>
+      </div>
+
+      <div class="role-card">
+        <div class="role-header">
+          <div class="role-num codex">03</div>
+          <div>
+            <div class="role-name">3D 에셋 생성 요청</div>
+            <div class="role-sub"><span class="tag tag-codex">Codex</span>에셋 에이전트</div>
+          </div>
+        </div>
+        <p>asset_manifest를 읽어 Meshy/Rodin/Tripo API를 병렬 호출. 결과 GLB를 <code>/assets/raw/</code>에 저장. 실패한 항목 재시도 루프 포함.</p>
+      </div>
+
+      <div class="role-card">
+        <div class="role-header">
+          <div class="role-num codex">04</div>
+          <div>
+            <div class="role-name">에셋 수리·최적화</div>
+            <div class="role-sub"><span class="tag tag-codex">Codex</span>리페어 에이전트</div>
+          </div>
+        </div>
+        <p>Blender Python API 호출로 리토폴로지, UV 재배치, LOD 0/1/2 생성, 콜라이더 단순화, 텍스처 압축. 최적화된 결과를 <code>/assets/ready/</code>로 이동.</p>
+      </div>
+
+      <div class="role-card">
+        <div class="role-header">
+          <div class="role-num codex">05</div>
+          <div>
+            <div class="role-name">Unity 씬 자동 조립</div>
+            <div class="role-sub"><span class="tag tag-codex">Codex</span>씬 에이전트</div>
+          </div>
+        </div>
+        <p>Unity Editor CLI + C# Editor 스크립트로 임포트, 프리팹 생성, 배치, 스폰 포인트, 라이트맵 베이크 큐, VRC Scene Descriptor 자동 부착.</p>
+      </div>
+
+      <div class="role-card">
+        <div class="role-header">
+          <div class="role-num codex">06</div>
+          <div>
+            <div class="role-name">Udon 로직 생성</div>
+            <div class="role-sub"><span class="tag tag-codex">Codex</span>로직 에이전트</div>
+          </div>
+        </div>
+        <p>world_spec의 interaction 목록을 읽어 UdonSharp 스크립트 자동 생성. 문, 버튼, 포털, 상태머신, 점수판, 오디오 트리거, 네트워크 동기화 포함.</p>
+      </div>
+
+      <div class="role-card">
+        <div class="role-header">
+          <div class="role-num anti">07</div>
+          <div>
+            <div class="role-name">비주얼 + 플레이테스트 QA</div>
+            <div class="role-sub"><span class="tag tag-anti">Antigravity</span>QA 에이전트</div>
+          </div>
+        </div>
+        <p>Antigravity 브라우저 에이전트가 씬 스크린샷/녹화를 분석. 오브젝트 겹침, 동선 막힘, 스케일 오류, 이질적 스타일, 어두운 구역 탐지. Browser Recording 아티팩트 생성.</p>
+      </div>
+
+      <div class="role-card">
+        <div class="role-header">
+          <div class="role-num both">08</div>
+          <div>
+            <div class="role-name">빌드 패키징 + 업로드</div>
+            <div class="role-sub"><span class="tag tag-both">Codex + Antigravity</span></div>
+          </div>
+        </div>
+        <p>Codex가 VRChat SDK 빌드·빌드 에러 수정을 담당. Antigravity가 업로드 전 체크리스트 Task List 아티팩트 생성. 승인 후 Codex가 CLI로 업로드 실행.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- PIPELINE FLOW -->
+  <section>
+    <div class="section-title">실행 흐름</div>
+    <div class="flow">
+      <div class="flow-row">
+        <div class="flow-label codex">Codex<br>PLAN</div>
+        <div class="flow-content">
+          <strong>world_spec 생성</strong>
+          <p>유저 텍스트 프롬프트 → JSON 파싱 → world_spec.json / room_graph.json / asset_manifest.json</p>
+        </div>
+      </div>
+      <div class="flow-row">
+        <div class="flow-label anti">Antigravity<br>REVIEW</div>
+        <div class="flow-content">
+          <strong>Implementation Plan 아티팩트 승인</strong>
+          <p>일관성 체크 → 사람 승인 → 진행/수정 루프</p>
+        </div>
+      </div>
+      <div class="flow-row">
+        <div class="flow-label codex">Codex<br>ASSETS</div>
+        <div class="flow-content">
+          <strong>3D 에셋 병렬 생성 + 수리</strong>
+          <p>Meshy/Rodin/Tripo API 병렬 호출 → raw/ 저장 → Blender 리토폴/UV/LOD → ready/ 이동</p>
+        </div>
+      </div>
+      <div class="flow-row">
+        <div class="flow-label codex">Codex<br>UNITY</div>
+        <div class="flow-content">
+          <strong>Unity 씬 자동 조립 + Udon 생성</strong>
+          <p>Unity Editor CLI 임포트 → 씬 배치 → UdonSharp 스크립트 생성 → 컴파일 에러 자동 수정 루프</p>
+        </div>
+      </div>
+      <div class="flow-row">
+        <div class="flow-label anti">Antigravity<br>QA</div>
+        <div class="flow-content">
+          <strong>비주얼 QA + 플레이테스트 녹화</strong>
+          <p>씬 스크린샷 분석 → 오류 목록 생성 → Codex에 수정 지시 → 재검사 루프</p>
+        </div>
+      </div>
+      <div class="flow-row">
+        <div class="flow-label both">BOTH<br>SHIP</div>
+        <div class="flow-content">
+          <strong>빌드 + 업로드</strong>
+          <p>Antigravity 체크리스트 승인 → Codex CLI VRChat SDK 빌드 + 업로드 실행</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- ENVIRONMENT SETUP -->
+  <section>
+    <div class="section-title">환경 세팅</div>
+
+    <div class="tabs">
+      <div class="tab active-codex" onclick="switchTab('codex-env', this)">Codex CLI 환경</div>
+      <div class="tab" onclick="switchTab('anti-env', this)">Antigravity 환경</div>
+      <div class="tab" onclick="switchTab('shared-env', this)">공유 프로젝트 구조</div>
+    </div>
+
+    <div id="codex-env" class="tab-content active">
+      <div class="card">
+        <h2>Codex CLI 설치 및 환경 변수</h2>
+        <div class="code-block">
+          <div class="code-header"><span>bash — 설치 및 인증</span><span class="lang">shell</span></div>
+<pre><span class="c-comment"># 설치</span>
+npm install -g @openai/codex
+
+<span class="c-comment"># 인증 (API Key 방식)</span>
+export OPENAI_API_KEY=<span class="c-str">"sk-..."</span>
+
+<span class="c-comment"># 또는 ChatGPT 구독 방식 (Plus/Pro)</span>
+codex login
+
+<span class="c-comment"># 외부 API 키 (에셋 생성용)</span>
+export MESHY_API_KEY=<span class="c-str">"msy_..."</span>
+export TRIPO_API_KEY=<span class="c-str">"tp_..."</span>
+export RODIN_API_KEY=<span class="c-str">"rd_..."</span></pre>
+        </div>
+
+        <h2 style="margin-top:18px;">AGENTS.md (Codex 컨텍스트 파일)</h2>
+        <p>프로젝트 루트에 <code>AGENTS.md</code>를 두면 Codex가 자동으로 읽어 에이전트 역할·프로젝트 구조·금지 사항을 인지합니다.</p>
+        <div class="code-block">
+          <div class="code-header"><span>AGENTS.md</span><span class="lang">markdown</span></div>
+<pre><span class="c-comment"># VRChat AI Pipeline — Codex Agent Context
+
+## 프로젝트 목표
+유저 텍스트 입력으로부터 VRChat에 업로드 가능한 월드를 자동 생성한다.
+
+## 폴더 구조
+/world_spec/       — world_spec.json, room_graph.json, asset_manifest.json
+/assets/raw/       — AI 생성 원본 GLB (수정 금지)
+/assets/ready/     — 최적화 완료 에셋 (Unity 임포트용)
+/unity/            — Unity 프로젝트 루트
+/unity/Assets/VRC/ — VRChat 전용 씬, 스크립트, 프리팹
+/logs/             — 에이전트 실행 로그
+
+## 에이전트 역할 (이 Codex 인스턴스)
+- world_spec 생성 (plan 서브에이전트)
+- 3D 에셋 API 병렬 호출 (asset 서브에이전트)
+- Blender Python 리토폴/최적화 (repair 서브에이전트)
+- Unity Editor CLI 씬 조립 (scene 서브에이전트)
+- UdonSharp 스크립트 생성·컴파일 (logic 서브에이전트)
+- VRChat SDK 빌드·업로드 (ship 서브에이전트)
+
+## 절대 금지
+- /assets/raw/ 파일 직접 수정 금지
+- Unity 씬에서 VRC_SceneDescriptor 제거 금지
+- UdonSharp에서 SendCustomNetworkEvent 무한 루프 생성 금지
+- 텍스처 해상도 2048px 초과 금지 (VRChat 성능 예산)
+- 단일 메쉬 폴리곤 70,000 초과 금지
+
+## 도구 사용 규칙
+- bash 실행 시 항상 /logs/에 타임스탬프 로그 기록
+- Unity Editor -batchmode 사용 시 반드시 -quit 플래그 포함
+- API 실패 시 3회 재시도 후 asset_manifest에 failed 마킹
+</span></pre>
+        </div>
+
+        <h2 style="margin-top:18px;">멀티에이전트 활성화 (실험적)</h2>
+        <div class="code-block">
+          <div class="code-header"><span>bash — 서브에이전트 스폰</span><span class="lang">shell</span></div>
+<pre><span class="c-comment"># Codex CLI 실행 후 내부 명령어</span>
+/experimental
+<span class="c-comment"># [x] Multi-agents 활성화</span>
+
+<span class="c-comment"># 또는 터미널에서 직접</span>
+codex <span class="c-str">"world_spec.json을 읽고 에셋 에이전트와 씬 에이전트를 병렬로 실행해서 \
+Unity 씬을 완성해줘. /unity/Assets/VRC/Worlds/GeneratedWorld.unity에 저장."</span></pre>
+        </div>
+      </div>
+    </div>
+
+    <div id="anti-env" class="tab-content">
+      <div class="card">
+        <h2>Antigravity 환경 세팅</h2>
+        <p>Antigravity는 VS Code 기반 IDE로 Agent Manager 화면에서 에이전트를 직접 관리합니다.</p>
+        <div class="code-block">
+          <div class="code-header"><span>bash — 설치</span><span class="lang">shell</span></div>
+<pre><span class="c-comment"># macOS</span>
+brew install antigravity
+
+<span class="c-comment"># 또는 공식 사이트에서 .dmg / .exe 다운로드</span>
+<span class="c-comment"># https://antigravity.codes</span>
+
+<span class="c-comment"># 프로젝트 열기</span>
+cd ~/vrchat-world-project
+antigravity .
+
+<span class="c-comment"># 모델 선택 (Agent Manager에서 설정 가능)</span>
+<span class="c-comment"># - 플랜/QA: Claude Sonnet 4.5 (추론 강점)</span>
+<span class="c-comment"># - 코드 생성: GPT-OSS / Gemini 3 Pro</span></pre>
+        </div>
+
+        <h2 style="margin-top:18px;">Antigravity Rules 파일</h2>
+        <p>프로젝트 루트에 <code>.antigravity/rules.md</code>를 두면 에이전트의 행동 방침을 커스터마이즈할 수 있습니다.</p>
+        <div class="code-block">
+          <div class="code-header"><span>.antigravity/rules.md</span><span class="lang">markdown</span></div>
+<pre><span class="c-comment"># VRChat Pipeline — Antigravity Agent Rules
+
+## 내 역할
+나는 이 파이프라인의 오케스트레이터 에이전트이다.
+코드 파일을 직접 수정하지 않는다. 플랜을 만들고, QA를 수행하고,
+Codex 에이전트에게 지시를 전달하는 역할을 한다.
+
+## 항상 먼저 하는 것
+1. world_spec.json을 읽어 전체 파이프라인 현황 파악
+2. Implementation Plan 아티팩트를 반드시 생성하고 사용자 승인을 받을 것
+3. 각 단계 완료 시 Task List 아티팩트를 업데이트할 것
+
+## QA 체크리스트 (스크린샷 분석 시 적용)
+- [ ] 오브젝트 겹침 없음
+- [ ] 스폰 포인트 지상에 위치
+- [ ] 이동 경로 막힘 없음
+- [ ] 머티리얼 누락 없음 (분홍색 오브젝트 = 에러)
+- [ ] 스케일 일관성 (사람 키 기준 1.7m)
+- [ ] 어두운 구역 없음 (최소 라이트 보장)
+- [ ] 에셋 스타일 일관성
+
+## 커뮤니케이션 규칙
+- Codex에게 지시할 때는 명확한 입출력 파일 경로를 항상 명시
+- 오류 발견 시 수정 → 재검사 루프 3회 초과하면 사람에게 에스컬레이션
+- Browser Recording 아티팩트는 QA 완료 증거로 반드시 생성
+</span></pre>
+        </div>
+
+        <h2 style="margin-top:18px;">MCP 서버 연결 (선택)</h2>
+        <div class="code-block">
+          <div class="code-header"><span>.antigravity/mcp.json</span><span class="lang">json</span></div>
+<pre>{
+  <span class="c-key">"servers"</span>: {
+    <span class="c-key">"filesystem"</span>: {
+      <span class="c-key">"command"</span>: <span class="c-str">"npx"</span>,
+      <span class="c-key">"args"</span>: [<span class="c-str">"-y"</span>, <span class="c-str">"@modelcontextprotocol/server-filesystem"</span>, <span class="c-str">"/vrchat-world-project"</span>]
+    },
+    <span class="c-key">"unity-mcp"</span>: {
+      <span class="c-key">"command"</span>: <span class="c-str">"python"</span>,
+      <span class="c-key">"args"</span>: [<span class="c-str">"./scripts/unity_mcp_server.py"</span>]
+    }
+  }
+}</pre>
+        </div>
+      </div>
+    </div>
+
+    <div id="shared-env" class="tab-content">
+      <div class="card">
+        <h2>공유 프로젝트 폴더 구조</h2>
+        <div class="code-block">
+          <div class="code-header"><span>project layout</span><span class="lang">tree</span></div>
+<pre>vrchat-world-project/
+├── AGENTS.md                    <span class="c-comment"># Codex 에이전트 컨텍스트</span>
+├── .antigravity/
+│   ├── rules.md                 <span class="c-comment"># Antigravity 에이전트 규칙</span>
+│   └── mcp.json                 <span class="c-comment"># MCP 서버 연결</span>
+├── world_spec/
+│   ├── world_spec.json          <span class="c-comment"># 월드 전체 명세</span>
+│   ├── room_graph.json          <span class="c-comment"># 방 연결 그래프</span>
+│   └── asset_manifest.json      <span class="c-comment"># 에셋 생성 목록 + 상태</span>
+├── assets/
+│   ├── raw/                     <span class="c-comment"># AI 생성 원본 GLB (수정 금지)</span>
+│   ├── ready/                   <span class="c-comment"># 최적화 완료</span>
+│   └── textures/                <span class="c-comment"># 압축된 텍스처</span>
+├── unity/
+│   └── Assets/
+│       └── VRC/
+│           ├── Worlds/          <span class="c-comment"># 씬 파일</span>
+│           ├── Scripts/         <span class="c-comment"># UdonSharp</span>
+│           └── Prefabs/         <span class="c-comment"># 에셋 프리팹</span>
+├── scripts/
+│   ├── gen_spec.py              <span class="c-comment"># 스펙 생성</span>
+│   ├── gen_assets.py            <span class="c-comment"># 에셋 API 호출</span>
+│   ├── repair_assets.py         <span class="c-comment"># Blender 최적화</span>
+│   ├── assemble_scene.py        <span class="c-comment"># Unity 씬 조립</span>
+│   ├── gen_udon.py              <span class="c-comment"># Udon 생성</span>
+│   └── qa_check.py              <span class="c-comment"># 성능 예산 검사</span>
+└── logs/                        <span class="c-comment"># 에이전트 실행 로그</span></pre>
+        </div>
+
+        <h2 style="margin-top:18px;">world_spec.json 스키마</h2>
+        <div class="code-block">
+          <div class="code-header"><span>world_spec.json</span><span class="lang">json</span></div>
+<pre>{
+  <span class="c-key">"name"</span>: <span class="c-str">"Neon Lounge"</span>,
+  <span class="c-key">"genre"</span>: <span class="c-str">"cyberpunk social hub"</span>,
+  <span class="c-key">"size"</span>: <span class="c-str">"small"</span>,
+  <span class="c-key">"player_capacity"</span>: <span class="c-num">32</span>,
+  <span class="c-key">"performance_target"</span>: <span class="c-str">"Good"</span>,
+  <span class="c-key">"rooms"</span>: [
+    { <span class="c-key">"id"</span>: <span class="c-str">"lobby"</span>, <span class="c-key">"theme"</span>: <span class="c-str">"neon entrance"</span>, <span class="c-key">"size_m"</span>: [<span class="c-num">20</span>,<span class="c-num">4</span>,<span class="c-num">20</span>] },
+    { <span class="c-key">"id"</span>: <span class="c-str">"lounge"</span>, <span class="c-key">"theme"</span>: <span class="c-str">"cyberpunk bar"</span>, <span class="c-key">"size_m"</span>: [<span class="c-num">30</span>,<span class="c-num">5</span>,<span class="c-num">30</span>] },
+    { <span class="c-key">"id"</span>: <span class="c-str">"roof"</span>, <span class="c-key">"theme"</span>: <span class="c-str">"rooftop city view"</span>, <span class="c-key">"size_m"</span>: [<span class="c-num">25</span>,<span class="c-num">3</span>,<span class="c-num">25</span>] }
+  ],
+  <span class="c-key">"interactions"</span>: [
+    { <span class="c-key">"type"</span>: <span class="c-str">"portal"</span>, <span class="c-key">"from"</span>: <span class="c-str">"lobby"</span>, <span class="c-key">"to"</span>: <span class="c-str">"lounge"</span> },
+    { <span class="c-key">"type"</span>: <span class="c-str">"toggle_light"</span>, <span class="c-key">"room"</span>: <span class="c-str">"lounge"</span> },
+    { <span class="c-key">"type"</span>: <span class="c-str">"audio_player"</span>, <span class="c-key">"room"</span>: <span class="c-str">"lounge"</span> },
+    { <span class="c-key">"type"</span>: <span class="c-str">"elevator"</span>, <span class="c-key">"from"</span>: <span class="c-str">"lounge"</span>, <span class="c-key">"to"</span>: <span class="c-str">"roof"</span> }
+  ]
+}</pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- PROMPTS -->
+  <section>
+    <div class="section-title">에이전트 프롬프트</div>
+
+    <div class="card">
+      <h2 style="color:var(--codex)">🔵 Codex CLI — 마스터 실행 프롬프트</h2>
+      <p>Codex에게 이 프롬프트를 주면 AGENTS.md를 읽고 전체 파이프라인을 순서대로 실행합니다.</p>
+      <div class="prompt-box">
+        <div class="prompt-header">Codex CLI 입력 프롬프트</div>
+        <div class="prompt-body">다음 VRChat 월드를 AI 파이프라인으로 자동 생성해줘.
+
+월드 설명: [여기에 월드 콘셉트를 한 문장으로]
+
+실행 순서:
+1. scripts/gen_spec.py를 실행해서 위 설명을 world_spec/world_spec.json,
+   room_graph.json, asset_manifest.json으로 변환해줘.
+
+2. scripts/gen_assets.py를 실행해서 asset_manifest의 모든 에셋을
+   병렬로 Meshy API에 요청하고 /assets/raw/에 저장해줘.
+   실패한 항목은 asset_manifest에 "status": "failed"로 마킹해줘.
+
+3. scripts/repair_assets.py를 실행해서 /assets/raw/의 모든 GLB를
+   Blender Python으로 리토폴로지, UV, LOD 생성, 콜라이더 단순화 처리하고
+   /assets/ready/에 저장해줘. 폴리곤은 오브젝트당 최대 15,000으로 제한.
+
+4. scripts/assemble_scene.py를 실행해서 Unity Editor -batchmode로
+   /assets/ready/의 에셋을 임포트하고, room_graph.json 구조에 따라
+   씬에 배치해줘. VRC_SceneDescriptor를 자동으로 부착해줘.
+
+5. scripts/gen_udon.py를 실행해서 world_spec의 interactions 목록을
+   UdonSharp 스크립트로 변환하고 /unity/Assets/VRC/Scripts/에 저장해줘.
+   각 인터랙션 오브젝트에 스크립트를 자동 부착해줘.
+
+6. scripts/qa_check.py를 실행해서 성능 예산을 검사해줘.
+   드로우콜 200 이상, 폴리곤 70,000 이상, 머티리얼 누락이 있으면
+   자동으로 수정해줘.
+
+각 단계 완료 시 /logs/pipeline_YYYYMMDD_HHMMSS.log에 기록해줘.
+오류 발생 시 최대 3회 자동 재시도 후 에스컬레이션.</div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:12px;">
+      <h2 style="color:var(--anti)">🟣 Antigravity — 오케스트레이터 프롬프트</h2>
+      <p>Antigravity의 Agent Manager에 이 프롬프트를 입력해서 파이프라인 전체를 감독하게 합니다.</p>
+      <div class="prompt-box">
+        <div class="prompt-header">Antigravity Agent Manager 입력 프롬프트</div>
+        <div class="prompt-body">너는 VRChat 월드 자동 생성 파이프라인의 오케스트레이터 에이전트야.
+
+현재 프로젝트 루트에 world_spec/, assets/, unity/, scripts/, logs/ 폴더가 있어.
+
+다음 역할을 수행해줘:
+
+[PHASE 1 — 플랜 검증]
+world_spec/world_spec.json을 읽고 Implementation Plan 아티팩트를 만들어줘.
+- 방 구조 일관성 체크
+- 인터랙션 충돌 가능성 탐지
+- 성능 예산 위험 (폴리곤, 드로우콜) 사전 경고
+내가 승인하면 다음 단계로 진행해.
+
+[PHASE 2 — 진행 추적]
+Codex 에이전트가 파이프라인을 실행하는 동안 logs/를 모니터링해서
+Task List 아티팩트를 실시간으로 업데이트해줘.
+실패 항목이 생기면 즉시 알려줘.
+
+[PHASE 3 — 비주얼 QA]
+씬 조립이 끝나면 unity/Assets/VRC/Worlds/ 폴더의 씬 파일을 기반으로
+다음을 검사해줘:
+- 분홍색(머티리얼 누락) 오브젝트 없는지
+- 스폰 포인트가 지상에 있는지
+- room_graph.json의 연결 구조가 씬에 반영됐는지
+오류가 있으면 Codex에게 명확한 수정 지시를 내려줘.
+
+[PHASE 4 — 최종 승인]
+QA가 통과되면 빌드 전 최종 체크리스트를 만들어줘.
+내가 승인하면 Codex에게 VRChat SDK 빌드 + 업로드를 지시해줘.
+
+항상 아티팩트(Task List, Implementation Plan, Browser Recording)를 생성해서
+내가 무슨 일이 진행 중인지 명확히 알 수 있게 해줘.</div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:12px;">
+      <h2>💡 단계별 서브 프롬프트 (필요시 개별 실행용)</h2>
+
+      <h3 style="color:var(--codex); margin-top:16px;">Codex — 에셋 수리만 다시 돌릴 때</h3>
+      <div class="prompt-box">
+        <div class="prompt-header">Codex CLI</div>
+        <div class="prompt-body">asset_manifest.json에서 "status": "failed" 인 에셋들만
+다시 Meshy API에 요청해서 /assets/raw/에 저장하고,
+repair_assets.py로 최적화 후 /assets/ready/로 이동해줘.
+완료 후 manifest의 status를 "ready"로 업데이트해줘.</div>
+      </div>
+
+      <h3 style="color:var(--codex); margin-top:16px;">Codex — Udon 스크립트 단독 생성</h3>
+      <div class="prompt-box">
+        <div class="prompt-header">Codex CLI</div>
+        <div class="prompt-body">world_spec/world_spec.json의 interactions 배열을 읽어서
+각 인터랙션에 맞는 UdonSharp 스크립트를 생성해줘.
+
+- portal: UdonSharp VRCPortalMarker 래퍼
+- toggle_light: 버튼 누르면 라이트 On/Off, 네트워크 동기화
+- audio_player: URL 스트리밍 + 볼륨 슬라이더
+- elevator: 애니메이션 + 탑승 감지 + 층 이동
+
+생성된 스크립트는 /unity/Assets/VRC/Scripts/에 저장하고
+해당 씬 오브젝트에 AddComponent로 자동 부착해줘.</div>
+      </div>
+
+      <h3 style="color:var(--anti); margin-top:16px;">Antigravity — QA만 단독 실행</h3>
+      <div class="prompt-box">
+        <div class="prompt-header">Antigravity</div>
+        <div class="prompt-body">unity/Assets/VRC/Worlds/의 씬 파일을 분석해서
+VRChat 업로드 전 QA를 수행해줘.
+
+다음 항목을 체크하고 Browser Recording 아티팩트를 만들어줘:
+1. VRC_SceneDescriptor 컴포넌트 존재 여부
+2. 스폰 포인트 Transform 확인 (y > 0)
+3. 머티리얼 참조 누락 오브젝트 수
+4. 총 폴리곤 수 (목표: 70,000 미만)
+5. 총 드로우콜 추정 (목표: 200 미만)
+6. UdonSharp 컴파일 에러 수
+
+실패 항목이 있으면 Codex에게 수정 지시를 내려줘.</div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+function switchTab(id, el) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active-codex', 'active-anti'));
+  document.getElementById(id).classList.add('active');
+  if (id === 'codex-env') el.classList.add('active-codex');
+  else if (id === 'anti-env') el.classList.add('active-anti');
+  else el.classList.add('active-codex');
+}
+</script>
+</body>
+</html>

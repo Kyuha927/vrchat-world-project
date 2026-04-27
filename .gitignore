@@ -1,0 +1,43 @@
+# Unity
+[Library]/
+[Temp]/
+[Obj]/
+[Build]/
+[Builds]/
+[Logs]/
+[MemoryCaptures]/
+Assets/AssetStoreTools*
+Assets/Plugins/Editor/JetBrains*
+Assets/Plugins/Editor/Rider*
+Assets/Plugins/Editor/VisualStudio*
+.collabignore
+*.csproj
+*.unityproj
+*.sln
+*.suo
+*.tmp
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svntmp
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+[ExportedObj]/
+.DS_Store
+.DS_Store?
+[Th]umbs.db
+Icon?
+ehthumbs.db
+desktop.ini
+*.apk
+*.unitypackage
+*.bundle
+
+# Pipeline
+__pycache__/
+logs/*.log
+!logs/.gitkeep
+# assets/raw/ # We keep them for now as they are small placeholders

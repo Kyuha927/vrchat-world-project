@@ -1,0 +1,7 @@
+{
+  "assets": [
+    { "id": "lobby_neon_gate", "room": "lobby", "prompt": "neon cyberpunk entrance gate", "status": "pending" },
+    { "id": "lounge_bar", "room": "lounge", "prompt": "cyberpunk lounge bar with emissive panels", "status": "pending" },
+    { "id": "roof_city_skyline", "room": "roof", "prompt": "rooftop cyberpunk city skyline backdrop", "status": "pending" }
+  ]
+}

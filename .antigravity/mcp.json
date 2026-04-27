@@ -1,0 +1,12 @@
+{
+  "servers": {
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/vrchat-world-project"]
+    },
+    "unity-mcp": {
+      "command": "python",
+      "args": ["./scripts/unity_mcp_server.py"]
+    }
+  }
+}

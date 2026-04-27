@@ -1,0 +1,18 @@
+{
+  "name": "Neon Lounge",
+  "genre": "cyberpunk social hub",
+  "size": "small",
+  "player_capacity": 32,
+  "performance_target": "Good",
+  "rooms": [
+    { "id": "lobby", "theme": "neon entrance", "size_m": [20, 4, 20] },
+    { "id": "lounge", "theme": "cyberpunk bar", "size_m": [30, 5, 30] },
+    { "id": "roof", "theme": "rooftop city view", "size_m": [25, 3, 25] }
+  ],
+  "interactions": [
+    { "type": "portal", "from": "lobby", "to": "lounge" },
+    { "type": "toggle_light", "room": "lounge" },
+    { "type": "audio_player", "room": "lounge" },
+    { "type": "elevator", "from": "lounge", "to": "roof" }
+  ]
+}
