@@ -16,6 +16,19 @@ app.use(express.static(path.join(__dirname, '..')));
 
 const rooms = new Map();
 
+function safeAck(callback, payload) {
+  if (typeof callback === 'function') callback(payload);
+}
+
+function cleanName(value, fallback) {
+  const cleaned = String(value || fallback)
+    .replace(/[<>&"'`]/g, '')
+    .replace(/[\u0000-\u001f\u007f]/g, '')
+    .trim()
+    .substring(0, 12);
+  return cleaned || fallback;
+}
+
 function genCode() {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   let code = '';
@@ -37,34 +50,40 @@ setInterval(() => {
 // Game loop — 20Hz
 setInterval(() => {
   for (const [code, room] of rooms) {
-    if (room.state === 'play' || room.state === 'countdown') {
-      room.update();
+    try {
+      if (room.state === 'play' || room.state === 'countdown') {
+        room.update();
 
-      // Send full state to host
-      io.to(`host_${code}`).emit('state', room.getSnapshot());
+        // Send full state to host
+        io.to(`host_${code}`).emit('state', room.getSnapshot());
 
-      // Send lightweight fan-specific state to each fan
-      for (const fan of room.fans.values()) {
-        if (fan.connected) {
-          io.to(fan.id).emit('fanState', {
-            state: room.state,
-            timeLeft: Math.ceil(room.gameTimer / 20),
-            countdown: Math.ceil(room.countdownTimer / 20),
-            hostState: room.hostState,
-            myDoor: fan.assignedDoor,
-            myDoorState: fan.doorState,
-            trapReady: fan.trapReady,
-            trapCooldown: Math.ceil(fan.trapCooldown / 20),
-            catchCount: fan.catchCount,
-            fanCount: room.fans.size,
-          });
+        // Send lightweight fan-specific state to each fan
+        for (const fan of room.fans.values()) {
+          if (fan.connected) {
+            io.to(fan.id).emit('fanState', {
+              state: room.state,
+              timeLeft: Math.ceil(room.gameTimer / 20),
+              countdown: Math.ceil(room.countdownTimer / 20),
+              hostState: room.hostState,
+              myDoor: fan.assignedDoor,
+              myDoorState: fan.doorState,
+              trapReady: fan.trapReady,
+              trapCooldown: Math.ceil(fan.trapCooldown / 20),
+              catchCount: fan.catchCount,
+              fanCount: room.fans.size,
+            });
+          }
+        }
+
+        if (room.state === 'result') {
+          const results = room.getResults();
+          io.to(code).emit('result', results);
         }
       }
-
-      if (room.state === 'result') {
-        const results = room.getResults();
-        io.to(code).emit('result', results);
-      }
+    } catch (err) {
+      console.error(`[!] Room ${code} failed:`, err);
+      io.to(code).emit('serverError', { err: 'server_error' });
+      rooms.delete(code);
     }
   }
 }, 50);
@@ -74,14 +93,48 @@ io.on('connection', (socket) => {
   let role = null; // 'host' | 'fan'
   let playerName = 'Guest';
 
+  function leaveCurrentRoom(reason = 'left') {
+    if (!currentRoom) return;
+    const code = currentRoom;
+    const room = rooms.get(code);
+
+    if (room) {
+      if (role === 'host') {
+        io.to(code).emit('hostLeft');
+        rooms.delete(code);
+        console.log(`[HOST] ${playerName} ${reason}, room ${code} closed`);
+      } else if (role === 'fan') {
+        room.removeFan(socket.id);
+        io.to(`host_${code}`).emit('fanLeft', {
+          name: playerName,
+          count: room.fans.size,
+          snapshot: room.getSnapshot(),
+        });
+        io.to(code).emit('lobbyUpdate', { fanCount: room.fans.size });
+        console.log(`[FAN] ${playerName} ${reason} room ${code}`);
+      }
+    }
+
+    socket.leave(code);
+    socket.leave(`host_${code}`);
+    currentRoom = null;
+    role = null;
+  }
+
   socket.on('setName', (name) => {
-    playerName = (name || 'Guest').substring(0, 12);
+    playerName = cleanName(name, 'Guest');
   });
 
   // === HOST (Streamer) ===
   socket.on('createRoom', (data, callback) => {
+    if (typeof data === 'function') {
+      callback = data;
+      data = {};
+    }
+    leaveCurrentRoom('replaced');
+
     const code = genCode();
-    playerName = (data?.name || '쵸로키').substring(0, 12);
+    playerName = cleanName(data?.name || playerName, '쵸로키');
     const room = new GameRoom(code, socket.id, playerName);
     rooms.set(code, room);
     currentRoom = code;
@@ -90,18 +143,23 @@ io.on('connection', (socket) => {
     socket.join(`host_${code}`);
 
     console.log(`[HOST] Room ${code} created by ${playerName}`);
-    callback({ ok: true, code, snapshot: room.getSnapshot() });
+    safeAck(callback, { ok: true, code, snapshot: room.getSnapshot() });
   });
 
-  socket.on('hostStart', () => {
-    if (!currentRoom || role !== 'host') return;
+  socket.on('hostStart', (data, callback) => {
+    if (typeof data === 'function') {
+      callback = data;
+    }
+    if (!currentRoom || role !== 'host') return safeAck(callback, { ok: false, err: '호스트 방이 없습니다' });
     const room = rooms.get(currentRoom);
-    if (!room || room.state !== 'lobby') return;
-    if (room.fans.size < 1) return;
+    if (!room || room.state !== 'lobby') return safeAck(callback, { ok: false, err: '시작할 수 없는 상태입니다' });
+    if (room.fans.size < 1) return safeAck(callback, { ok: false, err: '팬이 1명 이상 필요합니다' });
+    if (!room.canStart()) return safeAck(callback, { ok: false, err: '모든 팬이 준비해야 합니다' });
 
     room.startCountdown();
     io.to(currentRoom).emit('countdown', room.getSnapshot());
     console.log(`[HOST] Game starting in room ${currentRoom}`);
+    safeAck(callback, { ok: true });
   });
 
   socket.on('hostState', (state) => {
@@ -116,7 +174,9 @@ io.on('connection', (socket) => {
     const room = rooms.get(currentRoom);
     if (!room || room.state !== 'play') return;
 
-    const evt = room.bellRung(data.floor, data.doorIdx);
+    const floor = Number(data?.floor);
+    const doorIdx = Number(data?.doorIdx);
+    const evt = room.bellRung(floor, doorIdx);
     if (evt) {
       // Notify the specific fan that their bell was rung
       io.to(evt.fanId).emit('bellRung', { floor: evt.floor, doorIdx: evt.doorIdx });
@@ -130,7 +190,7 @@ io.on('connection', (socket) => {
     const room = rooms.get(currentRoom);
     if (!room) return;
 
-    const evt = room.hostCaught(data.fanId);
+    const evt = room.hostCaught(data?.fanId);
     if (evt) {
       io.to(currentRoom).emit('gameEvent', evt);
     }
@@ -139,21 +199,22 @@ io.on('connection', (socket) => {
   // === FAN (Neighbor) ===
   socket.on('joinAsNeighbor', (data, callback) => {
     const code = (data?.code || '').toUpperCase().trim();
-    playerName = (data?.name || '팬').substring(0, 12);
+    playerName = cleanName(data?.name, '팬');
 
     const room = rooms.get(code);
-    if (!room) return callback({ ok: false, err: '방을 찾을 수 없습니다' });
-    if (room.state !== 'lobby') return callback({ ok: false, err: '이미 게임이 진행 중입니다' });
+    if (!room) return safeAck(callback, { ok: false, err: '방을 찾을 수 없습니다' });
+    if (room.state !== 'lobby') return safeAck(callback, { ok: false, err: '이미 게임이 진행 중입니다' });
 
+    leaveCurrentRoom('switched');
     const result = room.addFan(socket.id, playerName);
-    if (!result.ok) return callback({ ok: false, err: result.err });
+    if (!result.ok) return safeAck(callback, { ok: false, err: result.err });
 
     currentRoom = code;
     role = 'fan';
     socket.join(code);
 
     console.log(`[FAN] ${playerName} joined room ${code} (${room.fans.size}/${room.maxFans})`);
-    callback({ ok: true, fan: result.fan, snapshot: room.getSnapshot() });
+    safeAck(callback, { ok: true, fan: result.fan, snapshot: room.getSnapshot() });
 
     // Notify host of new fan
     io.to(`host_${code}`).emit('fanJoined', {
@@ -191,7 +252,7 @@ io.on('connection', (socket) => {
     const room = rooms.get(currentRoom);
     if (!room) return;
 
-    const evt = room.fanAction(socket.id, { type: 'reaction', emoji });
+    const evt = room.fanAction(socket.id, { type: 'reaction', emoji: String(emoji || '').substring(0, 8) });
     if (evt) {
       io.to(currentRoom).emit('gameEvent', evt);
     }
@@ -200,7 +261,7 @@ io.on('connection', (socket) => {
   // === COMMON ===
   socket.on('chat', (msg) => {
     if (!currentRoom) return;
-    msg = (msg || '').substring(0, 100);
+    msg = String(msg || '').substring(0, 100);
     io.to(currentRoom).emit('chat', {
       name: playerName,
       role,
@@ -208,27 +269,13 @@ io.on('connection', (socket) => {
     });
   });
 
-  socket.on('disconnect', () => {
-    if (!currentRoom) return;
-    const room = rooms.get(currentRoom);
-    if (!room) return;
+  socket.on('leaveRoom', (callback) => {
+    leaveCurrentRoom('left');
+    safeAck(callback, { ok: true });
+  });
 
-    if (role === 'host') {
-      // Host left — end the room
-      io.to(currentRoom).emit('hostLeft');
-      rooms.delete(currentRoom);
-      console.log(`[HOST] ${playerName} left, room ${currentRoom} closed`);
-    } else if (role === 'fan') {
-      room.removeFan(socket.id);
-      io.to(`host_${currentRoom}`).emit('fanLeft', {
-        name: playerName,
-        count: room.fans.size,
-        snapshot: room.getSnapshot(),
-      });
-      console.log(`[FAN] ${playerName} left room ${currentRoom}`);
-    }
-    currentRoom = null;
-    role = null;
+  socket.on('disconnect', () => {
+    leaveCurrentRoom('disconnected from');
   });
 });
 

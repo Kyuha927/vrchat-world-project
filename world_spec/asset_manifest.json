@@ -1,7 +1,127 @@
 {
+  "optimization_notes": "모든 에셋 1024px 텍스처 이하, Mobile/Standard Lite 셰이더, 총 폴리곤 50k 이하",
   "assets": [
-    { "id": "lobby_neon_gate", "room": "lobby", "prompt": "neon cyberpunk entrance gate", "status": "pending" },
-    { "id": "lounge_bar", "room": "lounge", "prompt": "cyberpunk lounge bar with emissive panels", "status": "pending" },
-    { "id": "roof_city_skyline", "room": "roof", "prompt": "rooftop cyberpunk city skyline backdrop", "status": "pending" }
-  ]
+    {
+      "id": "cyber_door",
+      "type": "prop",
+      "room": "all_corridors",
+      "prompt": "low-poly cyberpunk apartment door, metal frame, small LED doorbell button, dark gray with neon red trim, game asset, clean topology, 500 polygons max",
+      "poly_budget": 500,
+      "instances": 18,
+      "status": "pending",
+      "source": "meshy_api"
+    },
+    {
+      "id": "doorbell_button",
+      "type": "interactable",
+      "room": "all_corridors",
+      "prompt": "tiny cyberpunk doorbell button, glowing red circle, wall-mounted, extremely simple, 50 polygons",
+      "poly_budget": 50,
+      "instances": 18,
+      "status": "pending",
+      "source": "probuilder"
+    },
+    {
+      "id": "hide_box",
+      "type": "prop",
+      "room": "all_corridors",
+      "prompt": "low-poly cardboard box large enough to hide in, cyberpunk stickers, simple cube shape, 100 polygons max",
+      "poly_budget": 100,
+      "instances": 5,
+      "status": "pending",
+      "source": "meshy_api"
+    },
+    {
+      "id": "cctv_camera",
+      "type": "prop",
+      "room": "corridor_2f,corridor_3f",
+      "prompt": "low-poly cyberpunk CCTV security camera, wall mounted, small red LED light, dark metal, 200 polygons max",
+      "poly_budget": 200,
+      "instances": 3,
+      "status": "pending",
+      "source": "meshy_api"
+    },
+    {
+      "id": "patrol_drone",
+      "type": "animated_prop",
+      "room": "corridor_2f,corridor_3f",
+      "prompt": "low-poly small patrol drone, cyberpunk style, purple LED lights, simple propeller, hovering, 300 polygons max",
+      "poly_budget": 300,
+      "instances": 3,
+      "status": "pending",
+      "source": "meshy_api"
+    },
+    {
+      "id": "neon_sign_villain",
+      "type": "decoration",
+      "room": "lobby",
+      "prompt": "flat neon sign text '빌런조합' in red neon glow, cyberpunk style, wall decoration, quad plane",
+      "poly_budget": 4,
+      "instances": 1,
+      "status": "pending",
+      "source": "texture_only"
+    },
+    {
+      "id": "neon_sign_pc",
+      "type": "decoration",
+      "room": "corridor_1f",
+      "prompt": "flat neon sign text 'PC방' in cyan neon glow, cyberpunk, quad plane",
+      "poly_budget": 4,
+      "instances": 1,
+      "status": "pending",
+      "source": "texture_only"
+    },
+    {
+      "id": "neon_sign_chicken",
+      "type": "decoration",
+      "room": "corridor_2f",
+      "prompt": "flat neon sign text '치킨' in yellow neon glow, cyberpunk, quad plane",
+      "poly_budget": 4,
+      "instances": 1,
+      "status": "pending",
+      "source": "texture_only"
+    },
+    {
+      "id": "scoreboard_panel",
+      "type": "ui",
+      "room": "lobby,rooftop",
+      "prompt": "flat screen panel for score display, dark frame, cyberpunk style, quad with frame",
+      "poly_budget": 20,
+      "instances": 2,
+      "status": "pending",
+      "source": "probuilder"
+    },
+    {
+      "id": "corridor_wall_tile",
+      "type": "structure",
+      "room": "all_corridors",
+      "prompt": "modular corridor wall section, concrete with exposed pipes, cyberpunk apartment",
+      "poly_budget": 50,
+      "instances": 30,
+      "status": "pending",
+      "source": "probuilder"
+    },
+    {
+      "id": "elevator_box",
+      "type": "interactable",
+      "room": "all",
+      "prompt": "simple elevator interior, metal walls, control panel, cyberpunk lighting",
+      "poly_budget": 200,
+      "instances": 4,
+      "status": "pending",
+      "source": "probuilder"
+    },
+    {
+      "id": "skybox_neon_city",
+      "type": "skybox",
+      "room": "rooftop",
+      "prompt": "cyberpunk city skyline night, neon lights, rain, dark purple sky, panoramic",
+      "poly_budget": 0,
+      "instances": 1,
+      "status": "pending",
+      "source": "texture_only"
+    }
+  ],
+  "total_estimated_polygons": "~15000 (with instancing)",
+  "total_estimated_draw_calls": "~40"
 }

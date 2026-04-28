@@ -1,0 +1,65 @@
+{
+  "project": "BellTui Cyberpunk Apartment",
+  "target_platform": "VRChat Quest",
+  "global_constraints": {
+    "max_polygons_per_asset": 500,
+    "max_texture_size": 1024,
+    "shader_target": "Mobile/Standard Lite",
+    "lighting": "Use baked/emissive texture details only; no real-time lights or particle effects.",
+    "mesh_guidance": "Single low-poly game prop, clean topology, simple silhouette, no tiny floating parts, no dense cables, no transparent glass, no subdivision, no high-frequency geometry."
+  },
+  "assets": [
+    {
+      "id": "cyber_door",
+      "source_manifest_prompt": "low-poly cyberpunk apartment door, metal frame, small LED doorbell button, dark gray with neon red trim, game asset, clean topology, 500 polygons max",
+      "meshy_text_to_3d_prompt": "Low-poly VRChat Quest game asset: cyberpunk apartment door for a neon city corridor. Make one closed rectangular metal door with a thick beveled frame, chunky panels, small built-in LED doorbell button on the right side, simple handle plate, and red emissive trim lines painted into the texture. Dark gunmetal and worn black metal, subtle scratches and grime, apartment unit number decal area, compact silhouette for corridor instancing. Single mesh or very few joined pieces, clean topology, flat faces, hard edges, optimized for mobile. Keep geometry extremely simple: no transparent glass, no real light sources, no loose wires, no dense bolts, no interior room, no animation, no particle effects. Target under 500 polygons.",
+      "expected_polygon_count": 420,
+      "texture_style_guide": {
+        "resolution": "1024px maximum, atlas-friendly square texture.",
+        "palette": "Dark gray metal, black frame, muted red neon/emissive accents, small off-white unit label decals.",
+        "material_finish": "Baked metal panels with painted edge wear, dirt near the bottom, and simple normal-like highlights baked into albedo if supported.",
+        "emission": "Use only texture-based red emission strips and the doorbell glow; do not imply real-time light objects.",
+        "avoid": "Avoid detailed hinges, dense screws, transparent windows, high-poly bevels, cables, or readable tiny text."
+      }
+    },
+    {
+      "id": "hide_box",
+      "source_manifest_prompt": "low-poly cardboard box large enough to hide in, cyberpunk stickers, simple cube shape, 100 polygons max",
+      "meshy_text_to_3d_prompt": "Low-poly VRChat Quest game asset: large cardboard hiding box for a cyberpunk apartment corridor stealth game. Make a simple openable-looking cube cardboard box large enough for a player to hide behind or inside, with chunky folded top flaps, slightly dented sides, taped seams, and a few cyberpunk delivery stickers and warning labels painted onto the texture. Keep the silhouette boxy and readable from a distance. Single lightweight prop, flat faces, clean topology, optimized for mobile. Use texture detail for tape, creases, dirt, barcode-like decals, and neon city courier branding. No interior clutter, no separate small objects, no thin strings, no dense folds, no high-poly damage, no animation. Target under 150 polygons.",
+      "expected_polygon_count": 120,
+      "texture_style_guide": {
+        "resolution": "512px preferred, 1024px maximum only if decals need clarity.",
+        "palette": "Warm cardboard brown balanced with cyan, magenta, and yellow sticker accents; keep most surfaces matte and low contrast.",
+        "material_finish": "Painted cardboard fiber, taped edges, grime, scuffs, and simple crease lines baked into the texture.",
+        "emission": "Optional tiny sticker glow marks only as painted emission; the box itself should remain non-glowing.",
+        "avoid": "Avoid realistic paper fuzz, many individual labels, holes with complex interiors, ropes, packing peanuts, or loose props."
+      }
+    },
+    {
+      "id": "cctv_camera",
+      "source_manifest_prompt": "low-poly cyberpunk CCTV security camera, wall mounted, small red LED light, dark metal, 200 polygons max",
+      "meshy_text_to_3d_prompt": "Low-poly VRChat Quest game asset: wall-mounted cyberpunk CCTV security camera for an apartment corridor. Create a compact surveillance camera with a simple rectangular wall bracket, short angled arm, boxy camera body, small hood visor, circular lens painted into the front face, and one tiny red LED status light as an emissive texture detail. Dark metal casing with subtle worn edges and warning stripe decal. Strong readable silhouette, hard-surface low-poly style, clean topology, mobile optimized. Single prop with minimal separate components, no transparent lens material, no real light, no cables except one very simple painted cable line on the mount, no tiny screws, no moving rig, no particle effects. Target under 220 polygons.",
+      "expected_polygon_count": 180,
+      "texture_style_guide": {
+        "resolution": "512px preferred, 1024px maximum.",
+        "palette": "Charcoal metal, dark blue-gray shadows, small red LED, tiny yellow caution stripe, restrained cyan edge markings.",
+        "material_finish": "Baked hard-surface panel seams, slight grime, edge wear, and a flat painted lens highlight.",
+        "emission": "Only the red LED dot and optional tiny sensor ring should use emission texture.",
+        "avoid": "Avoid glass transparency, many screws, articulated joints, exposed circuit boards, complex wiring, or glossy high-end reflections."
+      }
+    },
+    {
+      "id": "patrol_drone",
+      "source_manifest_prompt": "low-poly small patrol drone, cyberpunk style, purple LED lights, simple propeller, hovering, 300 polygons max",
+      "meshy_text_to_3d_prompt": "Low-poly VRChat Quest game asset: small cyberpunk patrol drone for apartment corridor surveillance. Make a compact hovering drone with a chunky central body, two or four very simple ducted propeller housings, short arms, front sensor eye painted into the texture, and purple LED strips as emissive texture details. Use a readable mobile-game silhouette, dark lightweight metal shell, minimal panel seams, and caution decals. Geometry must stay simple and sturdy: propellers can be flat cross shapes or painted discs, no thin antenna forest, no exposed wires, no weapon detail, no transparent parts, no rigging, no particles, no real lights. Single optimized low-poly prop, clean hard edges, suitable for duplicated patrol instances. Target under 320 polygons.",
+      "expected_polygon_count": 280,
+      "texture_style_guide": {
+        "resolution": "512px preferred, 1024px maximum.",
+        "palette": "Dark graphite body, muted violet/purple emission accents, small cyan sensor marks, limited yellow hazard decals.",
+        "material_finish": "Baked metal shell panels, subtle scratches, grime near vents, and simple painted rotor blur if desired.",
+        "emission": "Use purple LED strips and a small front sensor glow as texture emission only.",
+        "avoid": "Avoid detailed propeller blades, transparent domes, many arms, tiny vents, weapons, readable microtext, or complex underside machinery."
+      }
+    }
+  ]
+}

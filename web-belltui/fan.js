@@ -3,6 +3,9 @@ let socket = null;
 let myFan = null;
 let isReady = false;
 let currentScreen = 'join-screen';
+let joinedCode = '';
+let joinedName = '';
+let reconnectScreen = null;
 
 const TRAIT_LABELS = {
   slow: '느린 추격',
@@ -15,10 +18,22 @@ const TRAIT_LABELS = {
   throw: '슬리퍼 투척',
 };
 
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, ch => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;',
+  }[ch]));
+}
+
 // === Screen Management ===
 function showScreen(id) {
+  const next = document.getElementById(id);
+  if (!next) return;
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
+  next.classList.add('active');
   currentScreen = id;
 }
 
@@ -27,13 +42,29 @@ function joinRoom() {
   const code = document.getElementById('input-code').value.trim().toUpperCase();
   const name = document.getElementById('input-name').value.trim() || '이웃주민';
   const errEl = document.getElementById('join-error');
+  const joinBtn = document.getElementById('btn-join');
 
   if (code.length < 4) {
     errEl.textContent = '4자리 방 코드를 입력하세요';
     return;
   }
 
+  if (socket) {
+    socket.removeAllListeners();
+    socket.disconnect();
+    socket = null;
+  }
+
+  joinedCode = code;
+  joinedName = name;
   errEl.textContent = '접속 중...';
+  joinBtn.disabled = true;
+
+  if (typeof io !== 'function') {
+    errEl.textContent = 'Socket.io 클라이언트를 불러올 수 없습니다';
+    joinBtn.disabled = false;
+    return;
+  }
 
   socket = io(window.location.origin, { transports: ['websocket', 'polling'] });
 
@@ -42,6 +73,10 @@ function joinRoom() {
     socket.emit('joinAsNeighbor', { code, name }, (res) => {
       if (!res.ok) {
         errEl.textContent = res.err;
+        joinBtn.disabled = false;
+        socket.removeAllListeners();
+        socket.disconnect();
+        socket = null;
         return;
       }
 
@@ -53,6 +88,22 @@ function joinRoom() {
 
   socket.on('connect_error', () => {
     errEl.textContent = '서버에 연결할 수 없습니다';
+    joinBtn.disabled = false;
+  });
+
+  socket.io.on('reconnect', () => {
+    const screenBeforeReconnect = reconnectScreen || currentScreen;
+    reconnectScreen = null;
+    if (screenBeforeReconnect !== 'lobby-screen' || !joinedCode) return;
+    socket.emit('setName', joinedName);
+    socket.emit('joinAsNeighbor', { code: joinedCode, name: joinedName }, (res) => {
+      if (!res.ok) {
+        showScreen('dc-screen');
+        return;
+      }
+      myFan = res.fan;
+      setupLobby(res.snapshot);
+    });
   });
 
   // Event handlers
@@ -85,9 +136,18 @@ function joinRoom() {
     showScreen('dc-screen');
   });
 
+  socket.on('serverError', () => {
+    showScreen('dc-screen');
+  });
+
   socket.on('disconnect', () => {
     if (currentScreen !== 'result-screen') {
-      showScreen('dc-screen');
+      reconnectScreen = currentScreen;
+      setTimeout(() => {
+        if (socket && !socket.connected && currentScreen === reconnectScreen) {
+          showScreen('dc-screen');
+        }
+      }, 2000);
     }
   });
 }
@@ -106,6 +166,7 @@ function setupLobby(snapshot) {
 }
 
 function toggleReady() {
+  if (!socket || !socket.connected) return;
   isReady = !isReady;
   const btn = document.getElementById('btn-ready');
   btn.textContent = isReady ? '✅ 준비 완료!' : '✋ 준비!';
@@ -205,29 +266,40 @@ function onBellRung(data) {
 
 // === Fan Actions ===
 function openDoor() {
+  if (!socket || !socket.connected) return;
   socket.emit('fanAction', { type: 'openDoor' });
   vibrate(50);
 }
 
 function ignoreBell() {
+  if (!socket || !socket.connected) return;
   socket.emit('fanAction', { type: 'retreatDoor' });
 }
 
 function chase(dir) {
+  if (!socket || !socket.connected) return;
   socket.emit('fanAction', { type: 'chase', dir });
   vibrate(30);
 }
 
+function chaseButton(event, dir) {
+  event.preventDefault();
+  chase(dir);
+}
+
 function placeTrap() {
+  if (!socket || !socket.connected) return;
   socket.emit('fanAction', { type: 'trap' });
   vibrate([50, 30, 50]);
 }
 
 function retreat() {
+  if (!socket || !socket.connected) return;
   socket.emit('fanAction', { type: 'retreatDoor' });
 }
 
 function react(emoji) {
+  if (!socket || !socket.connected) return;
   socket.emit('fanReaction', emoji);
   showFloatingReaction(emoji);
   vibrate(20);
@@ -254,25 +326,25 @@ function showResults(results) {
 
   document.getElementById('result-host').innerHTML =
     `<div style="font-size:32px">🔨</div>
-     <div style="font-size:18px;font-weight:700;color:#E94560">${results.hostName}</div>
-     <div>점수: ${results.hostScore} | 남은 라이프: ${results.hostLives}</div>`;
+     <div style="font-size:18px;font-weight:700;color:#E94560">${escapeHtml(results.hostName)}</div>
+     <div>점수: ${escapeHtml(results.hostScore)} | 남은 라이프: ${escapeHtml(results.hostLives)}</div>`;
 
   if (results.mvp) {
     document.getElementById('result-mvp').innerHTML =
-      `<div style="font-size:14px;color:#ffd166">👑 MVP 이웃</div>
-       <div style="font-size:28px">${results.mvp.neighborType.emoji}</div>
-       <div style="font-weight:700">${results.mvp.name}</div>
-       <div>잡은 횟수: ${results.mvp.catchCount}회</div>`;
+	      `<div style="font-size:14px;color:#ffd166">👑 MVP 이웃</div>
+	       <div style="font-size:28px">${escapeHtml(results.mvp.neighborType.emoji)}</div>
+	       <div style="font-weight:700">${escapeHtml(results.mvp.name)}</div>
+	       <div>잡은 횟수: ${escapeHtml(results.mvp.catchCount)}회</div>`;
   }
 
   // Find my result
   const me = results.fans.find(f => f.name === myFan?.name);
   if (me) {
     document.getElementById('result-me').innerHTML =
-      `<div style="font-size:14px;color:#A855F7">내 결과</div>
-       <div style="font-size:28px">${me.neighborType.emoji}</div>
-       <div style="font-weight:700">${me.name}</div>
-       <div>잡은 횟수: ${me.catchCount}회</div>`;
+	      `<div style="font-size:14px;color:#A855F7">내 결과</div>
+	       <div style="font-size:28px">${escapeHtml(me.neighborType.emoji)}</div>
+	       <div style="font-weight:700">${escapeHtml(me.name)}</div>
+	       <div>잡은 횟수: ${escapeHtml(me.catchCount)}회</div>`;
   }
 }
 
@@ -291,3 +363,25 @@ function showFloatingReaction(emoji) {
   overlay.appendChild(el);
   setTimeout(() => el.remove(), 2000);
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+  const params = new URLSearchParams(window.location.search);
+  const code = (params.get('code') || '').trim().toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 4);
+  const codeInput = document.getElementById('input-code');
+  const nameInput = document.getElementById('input-name');
+
+  if (code) {
+    codeInput.value = code;
+    nameInput.focus();
+  }
+
+  codeInput.addEventListener('input', () => {
+    codeInput.value = codeInput.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 4);
+  });
+
+  [codeInput, nameInput].forEach(input => {
+    input.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') joinRoom();
+    });
+  });
+});

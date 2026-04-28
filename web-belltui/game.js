@@ -247,7 +247,7 @@ document.getElementById('multi-lobby').style.display='none';document.getElementB
 document.getElementById('over').style.display='none';
 document.getElementById('hud').classList.remove('hid');G=new Game();G.upHUD();
 if(isMulti)startMultiSync()}
-function lp(){if(G&&G.state!=='over'){G.update();if(isMulti&&G.state==='play')sendHostState()}if(G)G.draw();requestAnimationFrame(lp)}
+function lp(){if(G&&G.state!=='over'){G.update()}if(G)G.draw();requestAnimationFrame(lp)}
 loadSprites(()=>{document.getElementById('loading').classList.add('hid');document.getElementById('title').classList.remove('hid')});
 lp();
 
@@ -259,7 +259,7 @@ async function showMultiLobby(){
   try{
     await NET.connect();
     NET.setName('쵸로키');
-    const res=await NET.createRoom();
+    const res=await NET.createRoom({name:'쵸로키'});
     if(!res.ok){alert('방 생성 실패');return}
     document.getElementById('room-code-display').textContent=res.code;
     document.getElementById('fan-link').textContent=location.origin+'/fan.html?code='+res.code;
@@ -280,17 +280,20 @@ async function showMultiLobby(){
 }
 function updateFanList(snapshot){
   const el=document.getElementById('fan-names');
+  const esc=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
   el.innerHTML=snapshot.fans.map(f=>
-    `<span style="color:${f.ready?'#39FF14':'#889'}">${f.neighborType.emoji}${f.name}${f.ready?' ✓':''}</span>`
+    `<span style="color:${f.ready?'#39FF14':'#889'}">${esc(f.neighborType.emoji)}${esc(f.name)}${f.ready?' ✓':''}</span>`
   ).join(' · ');
 }
-function hostStartGame(){
+async function hostStartGame(){
   if(!NET.socket)return;
-  NET.socket.emit('hostStart');
+  const res=await NET.startHostGame();
+  if(!res.ok){alert(res.err||'게임을 시작할 수 없습니다');return}
   showCharSelect();
 }
 function leaveMulti(){
   isMulti=false;
+  if(syncTimer){clearInterval(syncTimer);syncTimer=null}
   if(NET.socket)NET.leaveRoom();
   NET.disconnect();
   document.getElementById('multi-lobby').style.display='none';
@@ -303,41 +306,71 @@ function startMultiSync(){
   syncTimer=setInterval(()=>{if(G&&isMulti)sendHostState()},50);
 }
 function sendHostState(){
-  if(!G||!NET.socket)return;
-  NET.sendInput({
-    x:G.p.x,y:G.p.y,fl:G.fl,face:G.p.face,vx:G.p.vx,af:G.p.af,
-    score:G.score,combo:G.combo,lives:G.lives,ring:G.p.ring,
-    dash:G.p.dash,notoriety:G.notoriety,goodCount:G.goodCount,state:G.state,
+  if(!G||!NET.socket||!NET.connected)return;
+  const p=G.p||{};
+  const n=(value,fallback=0)=>Number.isFinite(value)?value:fallback;
+  NET.sendHostState({
+    x:n(p.x,100),y:n(p.y,0),fl:n(G.fl,0),face:n(p.face,1),vx:n(p.vx,0),af:n(p.af,0),
+    score:n(G.score,0),combo:n(G.combo,0),lives:n(G.lives,3),ring:n(p.ring,0),
+    dash:Boolean(p.dash),notoriety:n(G.notoriety,0),goodCount:n(G.goodCount,0),state:G.state||'play',
   });
 }
-// Override bell ring to also notify server
-const _origBell=Game.prototype.update;
-const _wrapUpdate=Game.prototype.update;
-Game.prototype.update=function(){
-  const prevDoors=isMulti?this.floors[this.fl].doors.map(d=>d.st):null;
-  _wrapUpdate.call(this);
-  if(isMulti&&prevDoors){
-    this.floors[this.fl].doors.forEach((d,i)=>{
-      if(prevDoors[i]==='closed'&&d.st==='ring'){
-        NET.socket.emit('bellRung',{floor:this.fl,doorIdx:i});
-      }
+function captureDoorStates(game){
+  return game.floors.map(fl=>fl.doors.map(d=>d.st));
+}
+function findCaughtFan(game){
+  const fl=game.floors[game.fl];
+  if(!fl||!game.p)return null;
+  let best=null,bestDist=Infinity;
+  fl.doors.forEach(d=>{
+    if(!d.fanId||(d.st!=='angry'&&d.st!=='open'))return;
+    const x=Number.isFinite(d.nx)?d.nx:d.x;
+    const dist=Math.abs(x-game.p.x);
+    if(dist<bestDist){best=d;bestDist=dist}
+  });
+  return best&&bestDist<80?best.fanId:null;
+}
+// Override update once so host-side door/catch events are mirrored to the server.
+if(!Game.prototype._multiWrapped){
+  const _wrapUpdate=Game.prototype.update;
+  Game.prototype.update=function(){
+    const prevDoors=isMulti?captureDoorStates(this):null;
+    const prevState=this.state;
+    _wrapUpdate.call(this);
+    if(!isMulti||!NET.socket||!NET.connected||!prevDoors)return;
+
+    this.floors.forEach((fl,floor)=>{
+      fl.doors.forEach((d,doorIdx)=>{
+        if(prevDoors[floor]&&prevDoors[floor][doorIdx]==='closed'&&d.st==='ring'){
+          NET.sendBellRung(floor,doorIdx);
+        }
+      });
     });
-  }
-};
+
+    if(prevState==='play'&&this.state==='caught'){
+      const fanId=findCaughtFan(this);
+      if(fanId)NET.socket.emit('hostCaught',{fanId});
+    }
+  };
+  Game.prototype._multiWrapped=true;
+}
 function handleMultiEvent(evt){
   if(!G)return;
   if(evt.type==='fanOpenDoor'){
     const fl=G.floors[evt.floor];
     if(fl&&fl.doors[evt.doorIdx]){
       const d=fl.doors[evt.doorIdx];
-      if(d.st==='ring'){d.st='open';d.tm=180;d.nx=d.x;neighborSnd(evt.neighborType.trait)}
+      d.fanId=evt.fanId;
+      if(d.st==='ring'){d.st='open';d.tm=180;d.nx=d.x;if(evt.neighborType)neighborSnd(evt.neighborType.trait)}
     }
-    G.toast(`${evt.fanName}(${evt.neighborType.emoji})이 문을 열었다!`,'bad');
+    const label=evt.neighborType?`${evt.fanName}(${evt.neighborType.emoji})`:evt.fanName;
+    G.toast(`${label}이 문을 열었다!`,'bad');
   }
   if(evt.type==='fanChase'){
     const fl=G.floors[evt.floor];
     if(fl&&fl.doors[evt.doorIdx]){
       const d=fl.doors[evt.doorIdx];
+      d.fanId=evt.fanId;
       d.st='angry';d.cSpd=evt.speed*1.5;
     }
   }

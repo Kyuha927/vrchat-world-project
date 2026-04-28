@@ -1,18 +1,77 @@
 {
-  "name": "Neon Lounge",
-  "genre": "cyberpunk social hub",
+  "name": "BellTui Cyberpunk Apartment",
+  "description": "사이버펑크 도시 네온시티 2087의 초고층 아파트에서 벨튀를 하는 멀티플레이어 게임 월드",
+  "genre": "cyberpunk game world",
   "size": "small",
-  "player_capacity": 32,
-  "performance_target": "Good",
+  "player_capacity": 16,
+  "performance_target": "Quest",
+  "optimization": {
+    "max_polygons": 50000,
+    "max_draw_calls": 100,
+    "max_texture_size": 1024,
+    "max_build_size_mb": 50,
+    "realtime_lights": 0,
+    "shader": "Mobile/Standard Lite",
+    "lightmap": true
+  },
   "rooms": [
-    { "id": "lobby", "theme": "neon entrance", "size_m": [20, 4, 20] },
-    { "id": "lounge", "theme": "cyberpunk bar", "size_m": [30, 5, 30] },
-    { "id": "roof", "theme": "rooftop city view", "size_m": [25, 3, 25] }
+    {
+      "id": "lobby",
+      "theme": "neon entrance lobby — villain HQ entrance",
+      "size_m": [12, 4, 8],
+      "description": "어두운 로비. 네온 사인과 스코어보드. 게임 시작 지점.",
+      "poly_budget": 5000
+    },
+    {
+      "id": "corridor_1f",
+      "theme": "서민 아파트 복도 1층",
+      "size_m": [30, 3, 4],
+      "description": "형광등, 택배 박스, 우유곽. 문 5개. 숨는 곳 2개.",
+      "doors": 5,
+      "hide_spots": 2,
+      "poly_budget": 8000
+    },
+    {
+      "id": "corridor_2f",
+      "theme": "중산층 아파트 복도 2층",
+      "size_m": [30, 3, 4],
+      "description": "깔끔한 복도, 화분, CCTV 1대. 문 6개. 숨는 곳 2개.",
+      "doors": 6,
+      "hide_spots": 2,
+      "drones": 1,
+      "poly_budget": 10000
+    },
+    {
+      "id": "corridor_3f",
+      "theme": "고급 빌라 복도 3층",
+      "size_m": [30, 3, 4],
+      "description": "대리석 바닥, 레이저 그리드 힌트, CCTV 2대. 문 7개. 숨는 곳 1개.",
+      "doors": 7,
+      "hide_spots": 1,
+      "drones": 2,
+      "poly_budget": 12000
+    },
+    {
+      "id": "rooftop",
+      "theme": "옥상 전망대 — 네온시티 야경",
+      "size_m": [15, 3, 15],
+      "description": "게임 클리어 지점. 도시 야경 스카이박스. 스코어보드 & 결과 화면.",
+      "poly_budget": 5000
+    }
   ],
   "interactions": [
-    { "type": "portal", "from": "lobby", "to": "lounge" },
-    { "type": "toggle_light", "room": "lounge" },
-    { "type": "audio_player", "room": "lounge" },
-    { "type": "elevator", "from": "lounge", "to": "roof" }
-  ]
+    { "type": "bell_button", "rooms": ["corridor_1f", "corridor_2f", "corridor_3f"], "count_per_door": 1 },
+    { "type": "door_open_close", "rooms": ["corridor_1f", "corridor_2f", "corridor_3f"] },
+    { "type": "hide_spot", "rooms": ["corridor_1f", "corridor_2f", "corridor_3f"] },
+    { "type": "elevator", "connections": [["lobby", "corridor_1f"], ["corridor_1f", "corridor_2f"], ["corridor_2f", "corridor_3f"], ["corridor_3f", "rooftop"]] },
+    { "type": "scoreboard", "rooms": ["lobby", "rooftop"] },
+    { "type": "game_start_trigger", "room": "lobby" }
+  ],
+  "audio": {
+    "ambient": "cyberpunk_drone_low",
+    "bell_ring": "doorbell_ding",
+    "door_open": "metal_door_creak",
+    "caught": "alarm_buzz",
+    "score_popup": "coin_ding"
+  }
 }

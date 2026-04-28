@@ -2,7 +2,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap');
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
-html, body { height: 100%; overflow: hidden; }
+html, body { height: 100%; overflow: hidden; overscroll-behavior: none; }
 
 body {
   font-family: 'Outfit', sans-serif;
@@ -11,12 +11,15 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 #app {
   width: 100%;
   max-width: 420px;
   height: 100vh;
+  height: 100dvh;
   position: relative;
   overflow: hidden;
 }
@@ -91,6 +94,7 @@ input[type="text"]:focus { border-color: #E94560; }
   transition: transform 0.1s, box-shadow 0.2s;
   box-shadow: 0 4px 20px rgba(233,69,96,.3);
 }
+.btn-primary:disabled { opacity: 0.5; cursor: default; }
 .btn-primary:active { transform: scale(0.97); }
 .btn-primary.ready {
   background: linear-gradient(135deg, #39FF14, #2a9d0f);
@@ -265,6 +269,7 @@ input[type="text"]:focus { border-color: #E94560; }
   display: flex;
   gap: 10px;
   width: 100%;
+  touch-action: none;
 }
 .btn-chase {
   flex: 1;

@@ -1,11 +1,17 @@
 {
   "rooms": [
-    { "id": "lobby", "connects_to": ["lounge"] },
-    { "id": "lounge", "connects_to": ["lobby", "roof"] },
-    { "id": "roof", "connects_to": ["lounge"] }
+    { "id": "lobby", "connects_to": ["corridor_1f"] },
+    { "id": "corridor_1f", "connects_to": ["lobby", "corridor_2f"] },
+    { "id": "corridor_2f", "connects_to": ["corridor_1f", "corridor_3f"] },
+    { "id": "corridor_3f", "connects_to": ["corridor_2f", "rooftop"] },
+    { "id": "rooftop", "connects_to": ["corridor_3f"] }
   ],
   "edges": [
-    { "from": "lobby", "to": "lounge", "type": "portal" },
-    { "from": "lounge", "to": "roof", "type": "elevator" }
-  ]
+    { "from": "lobby", "to": "corridor_1f", "type": "elevator", "direction": "up" },
+    { "from": "corridor_1f", "to": "corridor_2f", "type": "elevator", "direction": "up" },
+    { "from": "corridor_2f", "to": "corridor_3f", "type": "elevator", "direction": "up" },
+    { "from": "corridor_3f", "to": "rooftop", "type": "elevator", "direction": "up" }
+  ],
+  "flow": "lobby → 1F → 2F → 3F → rooftop (linear progression)",
+  "spawn": "lobby"
 }

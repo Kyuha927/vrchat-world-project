@@ -1,9 +1,18 @@
 // GameRoom.js — Asymmetric multiplayer: 1 Streamer (Choroki) + N Fans (Neighbors)
+function cleanName(value, fallback) {
+  const cleaned = String(value || fallback)
+    .replace(/[<>&"'`]/g, '')
+    .replace(/[\u0000-\u001f\u007f]/g, '')
+    .trim()
+    .substring(0, 12);
+  return cleaned || fallback;
+}
+
 class GameRoom {
   constructor(code, hostId, hostName) {
     this.code = code;
     this.hostId = hostId;
-    this.hostName = hostName || '쵸로키';
+    this.hostName = cleanName(hostName, '쵸로키');
     this.state = 'lobby'; // lobby | countdown | play | result
     this.seed = Math.floor(Math.random() * 999999);
     this.tick = 0;
@@ -49,7 +58,7 @@ class GameRoom {
     const nbType = NEIGHBOR_TYPES[this.fans.size % NEIGHBOR_TYPES.length];
     const fan = {
       id,
-      name: (name || '팬').substring(0, 12),
+      name: cleanName(name, '팬'),
       neighborType: nbType,
       assignedDoor: null, // { floor, doorIdx } — assigned when game starts
       ready: false,
@@ -70,6 +79,9 @@ class GameRoom {
 
   removeFan(id) {
     this.fans.delete(id);
+    for (const [slot, fanId] of this.neighborSlots) {
+      if (fanId === id) this.neighborSlots.delete(slot);
+    }
   }
 
   setFanReady(id, ready) {
@@ -94,6 +106,7 @@ class GameRoom {
   }
 
   assignDoors() {
+    this.neighborSlots.clear();
     // Create door assignments across 6 floors
     // Each floor has 5 + floorIdx doors
     const assignments = [];
@@ -137,13 +150,33 @@ class GameRoom {
 
   // Called by host to sync Choroki state
   updateHostState(state) {
-    Object.assign(this.hostState, state);
+    if (!state || typeof state !== 'object') return;
+
+    const numericFields = new Set([
+      'x', 'y', 'fl', 'face', 'vx', 'af',
+      'score', 'combo', 'lives', 'ring', 'notoriety', 'goodCount',
+    ]);
+
+    for (const [key, value] of Object.entries(state)) {
+      if (!(key in this.hostState)) continue;
+
+      if (numericFields.has(key)) {
+        if (!Number.isFinite(value)) continue;
+        if (key === 'lives') this.hostState[key] = Math.max(0, Math.min(5, Math.floor(value)));
+        else if (key === 'fl') this.hostState[key] = Math.max(0, Math.min(5, Math.floor(value)));
+        else this.hostState[key] = value;
+      } else if (key === 'dash') {
+        this.hostState[key] = Boolean(value);
+      } else if (key === 'state' && typeof value === 'string') {
+        this.hostState[key] = value.substring(0, 20);
+      }
+    }
   }
 
   // Fan actions
   fanAction(fanId, action) {
     const fan = this.fans.get(fanId);
-    if (!fan || !fan.assignedDoor) return null;
+    if (!fan || !fan.assignedDoor || !action || typeof action !== 'object') return null;
 
     switch (action.type) {
       case 'openDoor':
@@ -165,7 +198,7 @@ class GameRoom {
         // Fan chooses chase direction
         if (fan.doorState === 'open' || fan.doorState === 'chasing') {
           fan.doorState = 'chasing';
-          fan.chaseDir = action.dir || 0; // -1 or 1
+          fan.chaseDir = action.dir < 0 ? -1 : action.dir > 0 ? 1 : 0;
           return {
             type: 'fanChase',
             fanId,
@@ -195,12 +228,12 @@ class GameRoom {
 
       case 'reaction':
         // Fan sends emoji reaction
-        fan.reaction = action.emoji;
+        fan.reaction = String(action.emoji || '').substring(0, 8);
         return {
           type: 'fanReaction',
           fanId,
           fanName: fan.name,
-          emoji: action.emoji,
+          emoji: fan.reaction,
         };
 
       case 'retreatDoor':
@@ -219,6 +252,7 @@ class GameRoom {
 
   // Host notifies that bell was rung at a specific door
   bellRung(floor, doorIdx) {
+    if (!Number.isInteger(floor) || !Number.isInteger(doorIdx)) return null;
     const key = `${floor}_${doorIdx}`;
     const fanId = this.neighborSlots.get(key);
     if (fanId) {
@@ -250,6 +284,12 @@ class GameRoom {
 
   update() {
     if (this.state === 'countdown') {
+      if (this.fans.size === 0) {
+        this.state = 'lobby';
+        this.countdownTimer = 0;
+        this.neighborSlots.clear();
+        return;
+      }
       this.countdownTimer--;
       if (this.countdownTimer <= 0) this.startGame();
       return;
@@ -258,6 +298,11 @@ class GameRoom {
 
     this.tick++;
     this.gameTimer--;
+
+    if (this.fans.size === 0) {
+      this.state = 'result';
+      return;
+    }
 
     // Update trap cooldowns
     for (const fan of this.fans.values()) {

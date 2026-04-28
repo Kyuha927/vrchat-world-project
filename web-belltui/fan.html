@@ -75,9 +75,9 @@
         <div id="action-chase" class="action-group">
           <p class="action-hint">🏃 추격 방향을 선택하세요!</p>
           <div class="chase-controls">
-            <button class="btn-chase btn-left" ontouchstart="chase(-1)" onmousedown="chase(-1)">◀ 왼쪽</button>
+            <button class="btn-chase btn-left" onpointerdown="chaseButton(event,-1)">◀ 왼쪽</button>
             <button class="btn-chase btn-trap" onclick="placeTrap()" id="btn-trap">🪤 함정</button>
-            <button class="btn-chase btn-right" ontouchstart="chase(1)" onmousedown="chase(1)">오른쪽 ▶</button>
+            <button class="btn-chase btn-right" onpointerdown="chaseButton(event,1)">오른쪽 ▶</button>
           </div>
           <button class="btn-small btn-retreat" onclick="retreat()">🏠 집으로 돌아가기</button>
         </div>

@@ -1,0 +1,36 @@
+[2026-04-28T08:15:24-07:00] read superpowers using skill
+[2026-04-28T08:15:35-07:00] read systematic debugging skill
+[2026-04-28T08:15:35-07:00] read tdd skill
+[2026-04-28T08:15:35-07:00] read verification skill
+[2026-04-28T08:15:46-07:00] list project files
+[2026-04-28T08:15:46-07:00] git status before review
+[2026-04-28T08:15:46-07:00] package metadata
+[2026-04-28T08:15:59-07:00] read server/index.js
+[2026-04-28T08:15:59-07:00] read server/GameRoom.js
+[2026-04-28T08:15:59-07:00] read net.js
+[2026-04-28T08:15:59-07:00] read fan files
+[2026-04-28T08:15:59-07:00] read html and game multiplayer refs
+[2026-04-28T08:16:11-07:00] read GameRoom tail
+[2026-04-28T08:16:11-07:00] read game multiplayer block
+[2026-04-28T08:16:11-07:00] read Game constructor fields
+[2026-04-28T08:16:11-07:00] read server package
+[2026-04-28T08:16:11-07:00] syntax checks initial
+[2026-04-28T08:17:10-07:00] run GameRoom regression tests red
+[2026-04-28T08:19:05-07:00] read game update catch details
+[2026-04-28T08:20:45-07:00] run GameRoom regression tests green attempt
+[2026-04-28T08:20:45-07:00] run syntax checks after patch
+[2026-04-28T08:20:52-07:00] inspect socket event names
+[2026-04-28T08:20:52-07:00] git diff review
+[2026-04-28T08:21:27-07:00] run GameRoom name sanitization red
+[2026-04-28T08:22:25-07:00] run GameRoom regression tests after sanitization
+[2026-04-28T08:22:25-07:00] run syntax checks after sanitization
+[2026-04-28T08:22:36-07:00] inspect changed server section
+[2026-04-28T08:22:37-07:00] inspect changed GameRoom section
+[2026-04-28T08:22:37-07:00] inspect changed net fan game sections
+[2026-04-28T08:22:58-07:00] start server smoke test on 3010
+[2026-04-28T08:23:19-07:00] final requested syntax checks
+[2026-04-28T08:23:19-07:00] final extended syntax checks
+[2026-04-28T08:23:19-07:00] final server tests
+[2026-04-28T08:23:19-07:00] final html socket/script order check
+[2026-04-28T08:23:19-07:00] final diff whitespace check
+[2026-04-28T08:23:23-07:00] final git status
