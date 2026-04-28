@@ -1,0 +1,15 @@
+{
+  "name": "belltui-3d-asset-pipeline",
+  "version": "1.0.0",
+  "description": "AI 3D 에셋 생성 파이프라인 — 벨튀 대작전",
+  "type": "module",
+  "scripts": {
+    "generate": "node generate-3d-assets.js",
+    "generate:dry": "node generate-3d-assets.js --dry-run",
+    "generate:single": "node generate-3d-assets.js --single",
+    "optimize": "python3 optimize-assets.py"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5"
+  }
+}

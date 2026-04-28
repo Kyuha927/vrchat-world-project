@@ -1,0 +1,1701 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>쵸로키의 벨튀 대작전 3D - 네온시티 2087</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --neon-red: #ff174d;
+      --neon-pink: #ff4fd8;
+      --neon-violet: #9a55ff;
+      --neon-cyan: #14f7ff;
+      --panel: rgba(9, 8, 18, 0.68);
+      --line: rgba(255, 79, 216, 0.35);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      background: #03040a;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    #hud {
+      position: fixed;
+      inset: 0;
+      z-index: 5;
+      pointer-events: none;
+      color: #f7e8ff;
+      text-shadow: 0 0 10px rgba(255, 79, 216, 0.8);
+    }
+
+    .topbar {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      right: 16px;
+      display: grid;
+      grid-template-columns: repeat(6, minmax(80px, auto));
+      gap: 8px;
+      align-items: start;
+      max-width: 980px;
+    }
+
+    .chip,
+    .prompt,
+    .toast,
+    .meter {
+      border: 1px solid var(--line);
+      background: linear-gradient(135deg, rgba(14, 11, 28, 0.72), rgba(39, 5, 45, 0.58));
+      box-shadow: 0 0 16px rgba(154, 85, 255, 0.22), inset 0 0 20px rgba(255, 23, 77, 0.08);
+      backdrop-filter: blur(10px);
+      border-radius: 8px;
+    }
+
+    .chip {
+      min-height: 48px;
+      padding: 8px 10px;
+      box-sizing: border-box;
+    }
+
+    .label {
+      display: block;
+      color: #9bf8ff;
+      font-size: 10px;
+      line-height: 1;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .value {
+      display: block;
+      margin-top: 5px;
+      color: #ff6b9a;
+      font-size: clamp(16px, 2vw, 23px);
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .meter {
+      position: absolute;
+      top: 82px;
+      left: 16px;
+      width: min(360px, calc(100vw - 32px));
+      padding: 10px;
+      box-sizing: border-box;
+    }
+
+    .meter-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 7px;
+      color: #ff4fd8;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .meter-track {
+      width: 100%;
+      height: 10px;
+      overflow: hidden;
+      border: 1px solid rgba(20, 247, 255, 0.3);
+      background: rgba(2, 5, 12, 0.74);
+      border-radius: 999px;
+    }
+
+    .meter-fill {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, #14f7ff, #ff4fd8, #ff174d);
+      box-shadow: 0 0 18px rgba(255, 79, 216, 0.9);
+      transition: width 180ms ease;
+    }
+
+    .crosshair {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 22px;
+      height: 22px;
+      transform: translate(-50%, -50%);
+    }
+
+    .crosshair::before,
+    .crosshair::after {
+      content: "";
+      position: absolute;
+      background: rgba(20, 247, 255, 0.9);
+      box-shadow: 0 0 10px rgba(20, 247, 255, 0.75);
+    }
+
+    .crosshair::before {
+      width: 2px;
+      height: 22px;
+      left: 10px;
+      top: 0;
+    }
+
+    .crosshair::after {
+      width: 22px;
+      height: 2px;
+      left: 0;
+      top: 10px;
+    }
+
+    .prompt {
+      position: absolute;
+      left: 50%;
+      bottom: 78px;
+      transform: translateX(-50%);
+      min-width: min(520px, calc(100vw - 32px));
+      padding: 12px 16px;
+      box-sizing: border-box;
+      color: #ffffff;
+      text-align: center;
+      font-size: 15px;
+      font-weight: 760;
+      opacity: 0;
+      transition: opacity 140ms ease;
+    }
+
+    .prompt.show {
+      opacity: 1;
+    }
+
+    .toast {
+      position: absolute;
+      right: 16px;
+      bottom: 18px;
+      width: min(430px, calc(100vw - 32px));
+      padding: 12px 14px;
+      box-sizing: border-box;
+      color: #f5eaff;
+      font-size: 14px;
+      line-height: 1.35;
+      opacity: 0.95;
+    }
+
+    #start {
+      position: fixed;
+      inset: 0;
+      z-index: 10;
+      display: grid;
+      place-items: center;
+      background:
+        radial-gradient(circle at 50% 30%, rgba(255, 79, 216, 0.18), transparent 34%),
+        radial-gradient(circle at 70% 74%, rgba(20, 247, 255, 0.12), transparent 30%),
+        rgba(1, 2, 8, 0.86);
+      color: #fff;
+    }
+
+    .start-panel {
+      width: min(720px, calc(100vw - 32px));
+      border: 1px solid rgba(255, 79, 216, 0.45);
+      background: rgba(8, 7, 19, 0.82);
+      box-shadow: 0 0 48px rgba(154, 85, 255, 0.26);
+      border-radius: 8px;
+      padding: 28px;
+      box-sizing: border-box;
+      text-align: center;
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      color: #ff4fd8;
+      font-size: clamp(28px, 6vw, 58px);
+      line-height: 1.02;
+      letter-spacing: 0;
+      text-shadow: 0 0 22px rgba(255, 79, 216, 0.92), 0 0 48px rgba(20, 247, 255, 0.45);
+    }
+
+    .subtitle {
+      margin: 0 0 24px;
+      color: #9bf8ff;
+      font-weight: 800;
+      font-size: clamp(15px, 2.5vw, 21px);
+    }
+
+    button {
+      border: 1px solid rgba(20, 247, 255, 0.75);
+      background: linear-gradient(135deg, rgba(255, 23, 77, 0.95), rgba(154, 85, 255, 0.88));
+      box-shadow: 0 0 22px rgba(255, 23, 77, 0.4);
+      color: white;
+      border-radius: 8px;
+      padding: 13px 22px;
+      font: inherit;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .help {
+      margin: 18px auto 0;
+      max-width: 560px;
+      color: rgba(255, 255, 255, 0.74);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .damage {
+      position: fixed;
+      inset: 0;
+      z-index: 7;
+      pointer-events: none;
+      background: radial-gradient(circle, transparent 42%, rgba(255, 23, 77, 0.45) 100%);
+      opacity: 0;
+      transition: opacity 180ms ease;
+    }
+
+    .damage.show {
+      opacity: 1;
+    }
+
+    @media (max-width: 740px) {
+      .topbar {
+        grid-template-columns: repeat(3, minmax(74px, 1fr));
+      }
+
+      .meter {
+        top: 136px;
+      }
+
+      .toast {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="start">
+    <div class="start-panel">
+      <h1>쵸로키의 벨튀 대작전 3D</h1>
+      <p class="subtitle">네온시티 2087</p>
+      <button id="playButton" type="button">작전 시작</button>
+      <p class="help">WASD 이동, 마우스 시점, Shift 질주, E 벨 누르기, F 선행, ↑/↓ 층 이동. 문을 누른 뒤 택배 상자와 화분 뒤에 숨어 시야를 끊으세요.</p>
+    </div>
+  </div>
+
+  <div id="hud">
+    <div class="topbar">
+      <div class="chip"><span class="label">Score</span><span id="score" class="value">0</span></div>
+      <div class="chip"><span class="label">Combo</span><span id="combo" class="value">x1</span></div>
+      <div class="chip"><span class="label">Lives</span><span id="lives" class="value">3</span></div>
+      <div class="chip"><span class="label">Floor</span><span id="floor" class="value">1F</span></div>
+      <div class="chip"><span class="label">Good Deeds</span><span id="good" class="value">0</span></div>
+      <div class="chip"><span class="label">Threat</span><span id="threat" class="value">평화</span></div>
+    </div>
+    <div class="meter">
+      <div class="meter-head"><span>NOTORIETY</span><span id="notorietyText">0 / 25</span></div>
+      <div class="meter-track"><div id="notorietyFill" class="meter-fill"></div></div>
+    </div>
+    <div class="crosshair"></div>
+    <div id="prompt" class="prompt"></div>
+    <div class="toast">벨을 누르면 콤보 타이머가 시작됩니다. 노출을 줄이려면 문 옆 상자나 화분 뒤에서 이탈 경로를 만드세요.</div>
+  </div>
+  <div id="damage" class="damage"></div>
+
+  <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+  <script>
+    // GLTFLoader 폴리필 — Three.js r160 (examples/js/ 제거됨)
+    // 별도 ESM 모듈 로드 대신 인라인 최소 구현
+    (function() {
+      // GLTFLoader를 동적으로 로드
+      const script = document.createElement('script');
+      script.type = 'module';
+      script.textContent = `
+        import { GLTFLoader } from 'https://unpkg.com/three@0.160.0/examples/jsm/loaders/GLTFLoader.js';
+        import { DRACOLoader } from 'https://unpkg.com/three@0.160.0/examples/jsm/loaders/DRACOLoader.js';
+        window.__THREE_GLTFLoader = GLTFLoader;
+        window.__THREE_DRACOLoader = DRACOLoader;
+        window.dispatchEvent(new Event('gltfloader-ready'));
+      `;
+      document.head.appendChild(script);
+    })();
+  </script>
+  <script>
+    const WORLD = {
+      halfWidth: 4.25,
+      length: 64,
+      floorHeight: 4.4,
+      floors: 5,
+      doorSpacing: 10,
+      eyeHeight: 1.62,
+      playerRadius: 0.35,
+    };
+
+    const NPC_TYPES = [
+      { id: "Grandma", name: "할머니", color: 0x8b5a2b, speed: 1.15, range: 7.2, fov: 0.74, delay: 1.25, action: "slow" },
+      { id: "Muscle", name: "헬창", color: 0xff263a, speed: 2.45, range: 8.5, fov: 0.86, delay: 0.85, action: "fast" },
+      { id: "Dog", name: "강아지", color: 0xffc928, speed: 1.95, range: 12.5, fov: 0.9, delay: 0.95, action: "far" },
+      { id: "Ghost", name: "고스트", color: 0xa35cff, speed: 1.55, range: 9.2, fov: 0.96, delay: 1.45, action: "phase", opacity: 0.45 },
+      { id: "Auntie", name: "아줌마", color: 0xff62bd, speed: 1.75, range: 8.8, fov: 0.82, delay: 0.95, action: "alarm" },
+      { id: "Guard", name: "경비", color: 0x10204d, speed: 1.85, range: 10.4, fov: 0.78, delay: 1.05, action: "guard" },
+      { id: "Cat", name: "고양이", color: 0xff8a1c, speed: 2.15, range: 7.8, fov: 0.9, delay: 0.7, action: "stun" },
+      { id: "Pajama", name: "파자마", color: 0x808a35, speed: 1.55, range: 9.7, fov: 0.84, delay: 1.15, action: "slipper" },
+    ];
+
+    const GOOD_DEEDS = [
+      { kind: "cat", label: "길고양이 간식 주기", color: 0xff9a2b },
+      { kind: "package", label: "택배 제자리 놓기", color: 0x66e2ff },
+      { kind: "light", label: "고장난 조명 고치기", color: 0xffffaa },
+    ];
+
+    const state = {
+      started: false,
+      score: 0,
+      combo: 1,
+      comboTimer: 0,
+      lives: 3,
+      floor: 0,
+      notoriety: 0,
+      goodDeeds: 0,
+      caughtCooldown: 0,
+      stunTimer: 0,
+      footTimer: 0,
+      goodSpawnTimer: 4,
+      droneTimer: 0,
+      robotTimer: 0,
+    };
+
+    const player = {
+      position: new THREE.Vector3(0, WORLD.eyeHeight, 24),
+      velocity: new THREE.Vector3(),
+      yaw: Math.PI,
+      pitch: 0,
+    };
+
+    const input = {
+      forward: false,
+      back: false,
+      left: false,
+      right: false,
+      sprint: false,
+    };
+
+    const doors = [];
+    const npcs = [];
+    const drones = [];
+    const robots = [];
+    const obstacles = [];
+    const goodEvents = [];
+    const slippers = [];
+    const rainDrops = [];
+    const cctvs = [];
+    const flickerLights = [];
+    const signs = [];
+
+    let scene;
+    let camera;
+    let renderer;
+    let clock;
+    let listenerStarted = false;
+    let audioCtx;
+    let humOsc;
+    let humGain;
+    const raycaster = new THREE.Raycaster();
+    const tmpVec = new THREE.Vector3();
+    const lookDir = new THREE.Vector3();
+    const forwardDir = new THREE.Vector3();
+    const rightDir = new THREE.Vector3();
+
+    const hud = {
+      score: document.getElementById("score"),
+      combo: document.getElementById("combo"),
+      lives: document.getElementById("lives"),
+      floor: document.getElementById("floor"),
+      good: document.getElementById("good"),
+      threat: document.getElementById("threat"),
+      notorietyText: document.getElementById("notorietyText"),
+      notorietyFill: document.getElementById("notorietyFill"),
+      prompt: document.getElementById("prompt"),
+      damage: document.getElementById("damage"),
+      start: document.getElementById("start"),
+      playButton: document.getElementById("playButton"),
+    };
+
+    const materials = {};
+
+    // ── 3D 에셋 매니저 ──────────────────────────────────
+    const assetManager = {
+      models: {},
+      loading: false,
+      loaded: 0,
+      total: 0,
+      basePath: '../assets/ready/3d/',
+      fallbackPath: '../assets/raw/3d/',
+
+      // GLTFLoader 초기화
+      _loader: null,
+      _loaderReady: false,
+      _initLoader() {
+        if (this._loader) return true;
+        const GLTFLoader = window.__THREE_GLTFLoader;
+        const DRACOLoader = window.__THREE_DRACOLoader;
+        if (!GLTFLoader || !DRACOLoader) return false;
+        this._loader = new GLTFLoader();
+        const dracoLoader = new DRACOLoader();
+        dracoLoader.setDecoderPath('https://unpkg.com/three@0.160.0/examples/jsm/libs/draco/');
+        this._loader.setDRACODecoder(dracoLoader);
+        this._loaderReady = true;
+        return true;
+      },
+
+      // 로더 준비 대기
+      async _waitForLoader() {
+        if (this._initLoader()) return;
+        return new Promise((resolve) => {
+          const check = () => {
+            if (this._initLoader()) { resolve(); return; }
+            setTimeout(check, 200);
+          };
+          window.addEventListener('gltfloader-ready', () => { this._initLoader(); resolve(); }, { once: true });
+          setTimeout(check, 500);
+        });
+      },
+
+      // 단일 모델 로드
+      async load(name, customPath) {
+        await this._waitForLoader();
+        const paths = customPath
+          ? [customPath]
+          : [`${this.basePath}${name}.glb`, `${this.fallbackPath}${name}.glb`];
+
+        for (const p of paths) {
+          try {
+            const gltf = await new Promise((resolve, reject) => {
+              this._loader.load(p, resolve, null, reject);
+            });
+            this.models[name] = gltf.scene;
+            console.log(`✅ GLB 로드: ${name}`);
+            return gltf.scene;
+          } catch { /* try next path */ }
+        }
+        console.warn(`⚠️ GLB 없음 (폴백 사용): ${name}`);
+        return null;
+      },
+
+      // 배치 로드 (비동기, 게임 시작 전 호출)
+      async loadAll(assetIds) {
+        await this._waitForLoader();
+        this.loading = true;
+        this.total = assetIds.length;
+        this.loaded = 0;
+
+        const promises = assetIds.map(async (id) => {
+          await this.load(id);
+          this.loaded++;
+        });
+
+        await Promise.allSettled(promises);
+        this.loading = false;
+        console.log(`📦 에셋 로드 완료: ${Object.keys(this.models).length}/${this.total}`);
+      },
+
+      // 모델 인스턴스 생성 (clone)
+      getInstance(name) {
+        if (!this.models[name]) return null;
+        return this.models[name].clone();
+      },
+
+      // 기존 도형을 GLB로 교체 (폴백 지원)
+      replaceWithModel(name, fallbackMesh, parent, position, rotation, scale) {
+        const model = this.getInstance(name);
+        if (model) {
+          model.position.copy(position || fallbackMesh.position);
+          if (rotation) model.rotation.copy(rotation);
+          if (scale) model.scale.copy(scale);
+          if (parent) {
+            parent.remove(fallbackMesh);
+            parent.add(model);
+          }
+          return model;
+        }
+        // GLB가 없으면 기존 도형 유지
+        return fallbackMesh;
+      },
+    };
+
+    // 게임에서 사용할 에셋 ID 목록 (우선순위 1)
+    const PRIORITY_ASSETS = [
+      'choroki_idle', 'choroki_hammer',
+      'door_closed', 'door_open',
+      'delivery_boxes', 'cctv_camera', 'patrol_drone', 'doorbell_button',
+      'sledgehammer',
+    ];
+
+    // 전체 에셋 ID 목록
+    const ALL_ASSETS = [
+      ...PRIORITY_ASSETS,
+      'npc_grandma', 'npc_muscle', 'npc_dog_owner', 'npc_ghost',
+      'npc_auntie', 'npc_guard', 'npc_cat', 'npc_pajama',
+      'elevator', 'stairs_section', 'wall_panel', 'ceiling_light',
+      'potted_plant', 'security_robot', 'wall_graffiti', 'neon_sign',
+      'jetpack', 'optical_camo', 'hacking_bracelet', 'toy_hammer_launcher', 'magnetic_boots',
+      'stray_cat_bowl', 'delivery_package', 'broken_light', 'street_mic',
+      'bell_effect', 'emp_wave', 'neon_smoke', 'hologram_glitch', 'dash_trail', 'alarm_light',
+    ];
+
+    init();
+
+    function init() {
+      scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x03040a);
+      scene.fog = new THREE.FogExp2(0x080518, 0.031);
+
+      camera = new THREE.PerspectiveCamera(72, window.innerWidth / window.innerHeight, 0.05, 180);
+      camera.rotation.order = "YXZ";
+
+      renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+      renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.outputColorSpace = THREE.SRGBColorSpace;
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.05;
+      document.body.insertBefore(renderer.domElement, hud.start);
+
+      clock = new THREE.Clock();
+      createMaterials();
+      buildWorld();
+      bindEvents();
+      updateCamera();
+      updateHud();
+
+      // GLB 에셋 백그라운드 로드 시도 (실패해도 게임 진행)
+      assetManager.loadAll(PRIORITY_ASSETS).then(() => {
+        console.log('🎮 Priority 에셋 로드 시도 완료');
+        // 추후: 로드된 모델로 기본 도형 교체 로직
+        // assetManager.loadAll(ALL_ASSETS); // 나머지 에셋도 백그라운드 로드
+      });
+
+      animate();
+    }
+
+    function createMaterials() {
+      materials.wall = new THREE.MeshStandardMaterial({ color: 0x171821, roughness: 0.82, metalness: 0.18 });
+      materials.floor = new THREE.MeshStandardMaterial({ color: 0x1d1f23, roughness: 0.9, metalness: 0.08 });
+      materials.ceiling = new THREE.MeshStandardMaterial({ color: 0x11121a, roughness: 0.8, metalness: 0.1 });
+      materials.door = new THREE.MeshStandardMaterial({ color: 0x253044, roughness: 0.62, metalness: 0.22 });
+      materials.doorTrim = new THREE.MeshStandardMaterial({ color: 0x08dfff, emissive: 0x08a9cc, emissiveIntensity: 1.5, roughness: 0.35 });
+      materials.bell = new THREE.MeshStandardMaterial({ color: 0xff4fd8, emissive: 0xff1aad, emissiveIntensity: 2.6, roughness: 0.28 });
+      materials.ledCyan = new THREE.MeshStandardMaterial({ color: 0x14f7ff, emissive: 0x14f7ff, emissiveIntensity: 3.1, roughness: 0.18 });
+      materials.ledPink = new THREE.MeshStandardMaterial({ color: 0xff174d, emissive: 0xff174d, emissiveIntensity: 2.8, roughness: 0.2 });
+      materials.glass = new THREE.MeshStandardMaterial({ color: 0x142944, emissive: 0x061933, emissiveIntensity: 0.6, transparent: true, opacity: 0.38, roughness: 0.08, metalness: 0.2 });
+      materials.box = new THREE.MeshStandardMaterial({ color: 0x8b5c32, roughness: 0.88 });
+      materials.plant = new THREE.MeshStandardMaterial({ color: 0x1e8d5c, roughness: 0.7 });
+      materials.pot = new THREE.MeshStandardMaterial({ color: 0x333447, roughness: 0.8 });
+      materials.rain = new THREE.MeshBasicMaterial({ color: 0x8fefff, transparent: true, opacity: 0.58 });
+      materials.cctv = new THREE.MeshStandardMaterial({ color: 0x141824, emissive: 0xff174d, emissiveIntensity: 0.7, metalness: 0.6, roughness: 0.28 });
+      materials.robot = new THREE.MeshStandardMaterial({ color: 0x1a2238, emissive: 0xff174d, emissiveIntensity: 0.8, metalness: 0.45, roughness: 0.34 });
+      materials.drone = new THREE.MeshStandardMaterial({ color: 0x8d4cff, emissive: 0x8d4cff, emissiveIntensity: 2.6, roughness: 0.22, transparent: true, opacity: 0.86 });
+    }
+
+    function buildWorld() {
+      scene.add(new THREE.HemisphereLight(0x253b60, 0x0a0614, 0.58));
+      const ambient = new THREE.AmbientLight(0x2a1738, 0.22);
+      scene.add(ambient);
+
+      for (let floor = 0; floor < WORLD.floors; floor += 1) {
+        const y = floor * WORLD.floorHeight;
+        buildFloorShell(floor, y);
+        buildDoors(floor, y);
+        buildProps(floor, y);
+        buildSigns(floor, y);
+        buildRainWindow(floor, y);
+        buildTransit(floor, y);
+      }
+    }
+
+    function buildFloorShell(floor, y) {
+      const corridor = new THREE.Group();
+      corridor.position.y = y;
+      scene.add(corridor);
+
+      const floorMesh = new THREE.Mesh(new THREE.BoxGeometry(WORLD.halfWidth * 2 + 0.5, 0.16, WORLD.length), materials.floor);
+      floorMesh.position.set(0, -0.08, 0);
+      corridor.add(floorMesh);
+
+      const ceiling = new THREE.Mesh(new THREE.BoxGeometry(WORLD.halfWidth * 2 + 0.5, 0.14, WORLD.length), materials.ceiling);
+      ceiling.position.set(0, 3.05, 0);
+      corridor.add(ceiling);
+
+      for (const side of [-1, 1]) {
+        const wall = new THREE.Mesh(new THREE.BoxGeometry(0.25, 3.2, WORLD.length), materials.wall);
+        wall.position.set(side * (WORLD.halfWidth + 0.12), 1.5, 0);
+        corridor.add(wall);
+
+        const strip = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.08, WORLD.length - 2), side > 0 ? materials.ledPink : materials.ledCyan);
+        strip.position.set(side * (WORLD.halfWidth - 0.18), 0.08, 0);
+        corridor.add(strip);
+
+        const light = new THREE.PointLight(side > 0 ? 0xff174d : 0x14f7ff, 0.8, 9, 1.9);
+        light.position.set(side * (WORLD.halfWidth - 0.45), 0.5, 0);
+        corridor.add(light);
+      }
+
+      for (let z = -WORLD.length / 2 + 4; z < WORLD.length / 2 - 2; z += 8) {
+        const fixture = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.05, 0.42), new THREE.MeshStandardMaterial({
+          color: 0xccffff,
+          emissive: 0xcaffff,
+          emissiveIntensity: 1.4,
+        }));
+        fixture.position.set(0, 2.92, z);
+        corridor.add(fixture);
+
+        const light = new THREE.PointLight(0xd7ffff, 1.45, 10.5, 2.0);
+        light.position.set(0, 2.65, z);
+        corridor.add(light);
+        flickerLights.push({ light, mesh: fixture, base: 1.45, phase: Math.random() * 9, floor });
+      }
+
+      const haze = new THREE.Mesh(new THREE.BoxGeometry(WORLD.halfWidth * 2, 2.6, WORLD.length), new THREE.MeshBasicMaterial({
+        color: 0x150b28,
+        transparent: true,
+        opacity: 0.025,
+        depthWrite: false,
+      }));
+      haze.position.set(0, 1.45, 0);
+      corridor.add(haze);
+    }
+
+    function buildDoors(floor, y) {
+      const zValues = [-24, -14, -4, 6, 16, 26];
+      zValues.forEach((z, zi) => {
+        for (const side of [-1, 1]) {
+          const root = new THREE.Group();
+          root.position.set(side * (WORLD.halfWidth + 0.02), y, z);
+          root.rotation.y = side > 0 ? Math.PI / 2 : -Math.PI / 2;
+          scene.add(root);
+
+          const doorMesh = new THREE.Mesh(new THREE.BoxGeometry(1.75, 2.48, 0.14), materials.door);
+          doorMesh.position.set(0, 1.23, 0);
+          root.add(doorMesh);
+
+          const trim = new THREE.Mesh(new THREE.BoxGeometry(1.92, 2.65, 0.04), materials.doorTrim);
+          trim.position.set(0, 1.25, -0.09);
+          root.add(trim);
+
+          const panel = new THREE.Mesh(new THREE.BoxGeometry(1.43, 1.76, 0.06), new THREE.MeshStandardMaterial({ color: 0x121722, roughness: 0.72, metalness: 0.16 }));
+          panel.position.set(0, 1.28, -0.16);
+          root.add(panel);
+
+          const bell = new THREE.Mesh(new THREE.SphereGeometry(0.12, 20, 16), materials.bell);
+          bell.position.set(0.7, 1.4, -0.2);
+          root.add(bell);
+
+          const num = makeTextSprite(`${floor + 1}${zi + 1}${side > 0 ? "B" : "A"}`, "#14f7ff", 1.3);
+          num.position.set(-0.42, 1.92, -0.23);
+          num.scale.set(0.7, 0.28, 1);
+          root.add(num);
+
+          const warm = new THREE.PointLight(0xffb46c, 0, 5, 2);
+          warm.position.set(side * (WORLD.halfWidth - 0.65), y + 1.5, z);
+          scene.add(warm);
+
+          doors.push({
+            floor,
+            side,
+            z,
+            root,
+            mesh: doorMesh,
+            bell,
+            warm,
+            state: "closed",
+            openT: 0,
+            cooldown: 0,
+            npcSpawned: false,
+            type: NPC_TYPES[(floor * 3 + zi + (side > 0 ? 2 : 0)) % NPC_TYPES.length],
+          });
+        }
+      });
+    }
+
+    function buildProps(floor, y) {
+      const propPositions = [
+        [-2.95, -20, "box"], [2.95, -10, "plant"], [-2.9, 2, "plant"],
+        [2.85, 12, "box"], [-2.75, 22, "box"], [2.9, 28, "plant"],
+      ];
+      for (const [x, z, kind] of propPositions) {
+        if (kind === "box") {
+          const group = new THREE.Group();
+          group.position.set(x, y, z);
+          const box1 = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.55, 0.8), materials.box);
+          box1.position.y = 0.28;
+          const box2 = new THREE.Mesh(new THREE.BoxGeometry(0.62, 0.45, 0.55), materials.box);
+          box2.position.set(0.12, 0.78, -0.05);
+          group.add(box1, box2);
+          scene.add(group);
+          obstacles.push({ floor, mesh: box1, radius: 0.78, position: new THREE.Vector3(x, y + 0.38, z) });
+        } else {
+          const group = new THREE.Group();
+          group.position.set(x, y, z);
+          const pot = new THREE.Mesh(new THREE.CylinderGeometry(0.34, 0.42, 0.48, 18), materials.pot);
+          pot.position.y = 0.24;
+          const leaves = new THREE.Mesh(new THREE.DodecahedronGeometry(0.58, 0), materials.plant);
+          leaves.position.y = 0.95;
+          group.add(pot, leaves);
+          scene.add(group);
+          obstacles.push({ floor, mesh: leaves, radius: 0.7, position: new THREE.Vector3(x, y + 0.68, z) });
+        }
+      }
+    }
+
+    function buildSigns(floor, y) {
+      const signData = [
+        { text: "PC방", color: "#14f7ff", x: -4.12, z: -29, ry: Math.PI / 2 },
+        { text: "치킨", color: "#ff174d", x: 4.12, z: -18, ry: -Math.PI / 2 },
+        { text: "빌런조합", color: "#ff4fd8", x: -4.12, z: 9, ry: Math.PI / 2 },
+        { text: "24시", color: "#f5ff5a", x: 4.12, z: 23, ry: -Math.PI / 2 },
+      ];
+
+      signData.forEach((info, i) => {
+        const sprite = makeTextSprite(info.text, info.color, 1.8);
+        sprite.position.set(info.x, y + 2.05, info.z);
+        sprite.rotation.y = info.ry;
+        sprite.scale.set(info.text.length > 3 ? 1.8 : 1.18, 0.46, 1);
+        scene.add(sprite);
+        signs.push(sprite);
+
+        const light = new THREE.PointLight(new THREE.Color(info.color), 1.4, 7, 1.8);
+        light.position.set(info.x * 0.85, y + 2.05, info.z + (i % 2 ? 0.6 : -0.6));
+        scene.add(light);
+      });
+    }
+
+    function buildRainWindow(floor, y) {
+      for (const z of [-WORLD.length / 2 - 0.08, WORLD.length / 2 + 0.08]) {
+        const windowMesh = new THREE.Mesh(new THREE.BoxGeometry(WORLD.halfWidth * 1.55, 1.8, 0.08), materials.glass);
+        windowMesh.position.set(0, y + 1.72, z);
+        scene.add(windowMesh);
+
+        for (let i = 0; i < 42; i += 1) {
+          const drop = new THREE.Mesh(new THREE.BoxGeometry(0.018, 0.35, 0.018), materials.rain);
+          drop.position.set((Math.random() - 0.5) * 7, y + 0.8 + Math.random() * 2.2, z + (z > 0 ? 0.45 : -0.45));
+          scene.add(drop);
+          rainDrops.push({ mesh: drop, floor, zBase: z, speed: 1.2 + Math.random() * 1.8 });
+        }
+      }
+    }
+
+    function buildTransit(floor, y) {
+      const elevator = new THREE.Mesh(new THREE.BoxGeometry(2.4, 2.6, 0.12), new THREE.MeshStandardMaterial({
+        color: 0x172331,
+        emissive: 0x0c2138,
+        emissiveIntensity: 0.6,
+        roughness: 0.34,
+        metalness: 0.55,
+      }));
+      elevator.position.set(0, y + 1.3, WORLD.length / 2 - 0.18);
+      scene.add(elevator);
+
+      const liftSign = makeTextSprite("ELEV ↑↓", "#14f7ff", 1.25);
+      liftSign.position.set(0, y + 2.78, WORLD.length / 2 - 0.34);
+      liftSign.scale.set(1.25, 0.28, 1);
+      scene.add(liftSign);
+
+      const stairs = new THREE.Group();
+      stairs.position.set(-2.7, y, WORLD.length / 2 - 3);
+      for (let i = 0; i < 5; i += 1) {
+        const step = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.16, 0.58), materials.floor);
+        step.position.set(0, i * 0.14, -i * 0.55);
+        stairs.add(step);
+      }
+      scene.add(stairs);
+
+      if (floor >= 1) {
+        const cctv = new THREE.Group();
+        cctv.position.set(3.7, y + 2.45, -3);
+        const body = new THREE.Mesh(new THREE.BoxGeometry(0.46, 0.28, 0.34), materials.cctv);
+        const lens = new THREE.Mesh(new THREE.SphereGeometry(0.1, 16, 10), materials.bell);
+        lens.position.z = -0.23;
+        cctv.add(body, lens);
+        scene.add(cctv);
+        cctvs.push({ floor, group: cctv, yaw: 0 });
+      }
+    }
+
+    function makeTextSprite(text, color, fontScale = 1) {
+      const canvas = document.createElement("canvas");
+      canvas.width = 512;
+      canvas.height = 160;
+      const ctx = canvas.getContext("2d");
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "rgba(4, 4, 12, 0.62)";
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 6;
+      roundRect(ctx, 18, 24, 476, 104, 12);
+      ctx.fill();
+      ctx.stroke();
+      ctx.font = `900 ${Math.floor(54 * fontScale)}px system-ui, Apple SD Gothic Neo, sans-serif`;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.shadowColor = color;
+      ctx.shadowBlur = 24;
+      ctx.fillStyle = color;
+      ctx.fillText(text, 256, 78);
+      const texture = new THREE.CanvasTexture(canvas);
+      texture.colorSpace = THREE.SRGBColorSpace;
+      const material = new THREE.SpriteMaterial({ map: texture, transparent: true, blending: THREE.AdditiveBlending });
+      return new THREE.Sprite(material);
+    }
+
+    function roundRect(ctx, x, y, w, h, r) {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.arcTo(x + w, y, x + w, y + h, r);
+      ctx.arcTo(x + w, y + h, x, y + h, r);
+      ctx.arcTo(x, y + h, x, y, r);
+      ctx.arcTo(x, y, x + w, y, r);
+      ctx.closePath();
+    }
+
+    function bindEvents() {
+      hud.playButton.addEventListener("click", startGame);
+      document.addEventListener("pointerlockchange", () => {
+        state.started = document.pointerLockElement === renderer.domElement;
+        hud.start.style.display = state.started ? "none" : "grid";
+      });
+
+      window.addEventListener("resize", onResize);
+      document.addEventListener("mousemove", (event) => {
+        if (!state.started) return;
+        player.yaw -= event.movementX * 0.0022;
+        player.pitch -= event.movementY * 0.002;
+        player.pitch = THREE.MathUtils.clamp(player.pitch, -1.26, 1.26);
+      });
+
+      document.addEventListener("keydown", (event) => {
+        if (event.repeat) return;
+        setKey(event.code, true);
+        if (event.code === "KeyE") ringNearestDoor();
+        if (event.code === "KeyF") doGoodDeed();
+        if (event.code === "ArrowUp") changeFloor(1);
+        if (event.code === "ArrowDown") changeFloor(-1);
+      });
+
+      document.addEventListener("keyup", (event) => setKey(event.code, false));
+    }
+
+    function startGame() {
+      const lockRequest = renderer.domElement.requestPointerLock();
+      hud.start.style.display = "none";
+      if (lockRequest && typeof lockRequest.catch === "function") {
+        lockRequest.catch(() => {
+          hud.start.style.display = "grid";
+        });
+      }
+      startAudio();
+    }
+
+    function setKey(code, down) {
+      if (code === "KeyW") input.forward = down;
+      if (code === "KeyS") input.back = down;
+      if (code === "KeyA") input.left = down;
+      if (code === "KeyD") input.right = down;
+      if (code === "ShiftLeft" || code === "ShiftRight") input.sprint = down;
+    }
+
+    function startAudio() {
+      if (listenerStarted) return;
+      listenerStarted = true;
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      humOsc = audioCtx.createOscillator();
+      humGain = audioCtx.createGain();
+      humOsc.type = "sawtooth";
+      humOsc.frequency.value = 55;
+      humGain.gain.value = 0.018;
+      humOsc.connect(humGain).connect(audioCtx.destination);
+      humOsc.start();
+    }
+
+    function beep(type) {
+      if (!audioCtx) return;
+      const now = audioCtx.currentTime;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain).connect(audioCtx.destination);
+      if (type === "bell") {
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(740, now);
+        osc.frequency.exponentialRampToValueAtTime(1220, now + 0.08);
+        gain.gain.setValueAtTime(0.001, now);
+        gain.gain.exponentialRampToValueAtTime(0.13, now + 0.015);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.42);
+        osc.stop(now + 0.45);
+      } else if (type === "alarm") {
+        osc.type = "square";
+        osc.frequency.setValueAtTime(180, now);
+        osc.frequency.setValueAtTime(410, now + 0.1);
+        osc.frequency.setValueAtTime(180, now + 0.2);
+        gain.gain.setValueAtTime(0.001, now);
+        gain.gain.exponentialRampToValueAtTime(0.16, now + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.55);
+        osc.stop(now + 0.58);
+      } else if (type === "step") {
+        osc.type = "triangle";
+        osc.frequency.setValueAtTime(95, now);
+        gain.gain.setValueAtTime(0.035, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.07);
+        osc.stop(now + 0.08);
+      } else if (type === "elevator") {
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(420, now);
+        osc.frequency.exponentialRampToValueAtTime(880, now + 0.16);
+        gain.gain.setValueAtTime(0.001, now);
+        gain.gain.exponentialRampToValueAtTime(0.11, now + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.55);
+        osc.stop(now + 0.58);
+      } else if (type === "good") {
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(520, now);
+        osc.frequency.exponentialRampToValueAtTime(1040, now + 0.12);
+        gain.gain.setValueAtTime(0.001, now);
+        gain.gain.exponentialRampToValueAtTime(0.09, now + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+        osc.stop(now + 0.38);
+      }
+    }
+
+    function onResize() {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    function animate() {
+      requestAnimationFrame(animate);
+      const dt = Math.min(clock.getDelta(), 0.05);
+      update(dt);
+      renderer.render(scene, camera);
+    }
+
+    function update(dt) {
+      updatePlayer(dt);
+      updateCamera();
+      updateDoors(dt);
+      updateNpcs(dt);
+      updateDrones(dt);
+      updateRobots(dt);
+      updateSlippers(dt);
+      updateGoodEvents(dt);
+      updateAtmosphere(dt);
+      updatePrompt();
+      updateHud();
+      hammerVFX.update(dt);
+    }
+
+    function updatePlayer(dt) {
+      state.caughtCooldown = Math.max(0, state.caughtCooldown - dt);
+      state.stunTimer = Math.max(0, state.stunTimer - dt);
+      state.comboTimer = Math.max(0, state.comboTimer - dt);
+      if (state.comboTimer <= 0) state.combo = 1;
+
+      forwardDir.set(Math.sin(player.yaw), 0, Math.cos(player.yaw) * -1).normalize();
+      rightDir.set(Math.cos(player.yaw), 0, Math.sin(player.yaw)).normalize();
+
+      const move = new THREE.Vector3();
+      if (input.forward) move.add(forwardDir);
+      if (input.back) move.sub(forwardDir);
+      if (input.right) move.add(rightDir);
+      if (input.left) move.sub(rightDir);
+
+      if (move.lengthSq() > 0) {
+        move.normalize();
+        const sprint = input.sprint && state.stunTimer <= 0;
+        const baseSpeed = state.stunTimer > 0 ? 1.15 : sprint ? 5.1 : 3.05;
+        const next = player.position.clone().addScaledVector(move, baseSpeed * dt);
+        next.x = THREE.MathUtils.clamp(next.x, -WORLD.halfWidth + WORLD.playerRadius, WORLD.halfWidth - WORLD.playerRadius);
+        next.z = THREE.MathUtils.clamp(next.z, -WORLD.length / 2 + WORLD.playerRadius, WORLD.length / 2 - WORLD.playerRadius);
+
+        for (const obstacle of obstacles) {
+          if (obstacle.floor !== state.floor) continue;
+          const flatDist = Math.hypot(next.x - obstacle.position.x, next.z - obstacle.position.z);
+          if (flatDist < obstacle.radius + WORLD.playerRadius) {
+            const away = new THREE.Vector2(next.x - obstacle.position.x, next.z - obstacle.position.z).normalize();
+            next.x = obstacle.position.x + away.x * (obstacle.radius + WORLD.playerRadius);
+            next.z = obstacle.position.z + away.y * (obstacle.radius + WORLD.playerRadius);
+          }
+        }
+
+        player.position.copy(next);
+        state.footTimer -= dt;
+        if (state.footTimer <= 0 && state.started) {
+          beep("step");
+          state.footTimer = sprint ? 0.23 : 0.38;
+        }
+      }
+
+      player.position.y = state.floor * WORLD.floorHeight + WORLD.eyeHeight;
+    }
+
+    function updateCamera() {
+      camera.position.copy(player.position);
+      camera.rotation.set(player.pitch, player.yaw, 0);
+    }
+
+    // ── 🔨 해머 슬램 VFX 시스템 ──────────────────────────
+    const hammerVFX = {
+      active: [],
+      shakeIntensity: 0,
+      flashAlpha: 0,
+
+      // 메인 이펙트 생성
+      spawn(position) {
+        const fx = {
+          age: 0,
+          maxAge: 1.8,
+          pos: position.clone(),
+          rings: [],
+          sparks: [],
+          cracks: null,
+          flash: null,
+        };
+
+        // 1. 충격파 링 3개 (시차 생성)
+        for (let i = 0; i < 3; i++) {
+          const ringGeo = new THREE.RingGeometry(0.05, 0.12, 48);
+          const ringMat = new THREE.MeshBasicMaterial({
+            color: i === 0 ? 0x00ff88 : i === 1 ? 0x08dfff : 0xff4fd8,
+            transparent: true,
+            opacity: 1.0,
+            side: THREE.DoubleSide,
+            blending: THREE.AdditiveBlending,
+          });
+          const ring = new THREE.Mesh(ringGeo, ringMat);
+          ring.position.copy(position);
+          ring.position.y = position.y - WORLD.eyeHeight + 0.05;
+          ring.rotation.x = -Math.PI / 2;
+          ring.scale.set(0.1, 0.1, 0.1);
+          ring._delay = i * 0.12;
+          ring._speed = 6 + i * 2;
+          ring._maxScale = 3.5 + i * 1.5;
+          scene.add(ring);
+          fx.rings.push(ring);
+        }
+
+        // 2. 스파크 파티클 (40개)
+        for (let i = 0; i < 40; i++) {
+          const sparkGeo = new THREE.BoxGeometry(0.04, 0.04, 0.04);
+          const hue = Math.random() > 0.5 ? 0x00ff88 : (Math.random() > 0.5 ? 0x08dfff : 0xff4fd8);
+          const sparkMat = new THREE.MeshBasicMaterial({
+            color: hue,
+            transparent: true,
+            opacity: 1.0,
+            blending: THREE.AdditiveBlending,
+          });
+          const spark = new THREE.Mesh(sparkGeo, sparkMat);
+          spark.position.copy(position);
+          spark.position.y = position.y - WORLD.eyeHeight + 0.1;
+
+          const angle = Math.random() * Math.PI * 2;
+          const speed = 2 + Math.random() * 6;
+          spark._vel = new THREE.Vector3(
+            Math.cos(angle) * speed,
+            2 + Math.random() * 5,
+            Math.sin(angle) * speed
+          );
+          spark._gravity = -12;
+          spark._life = 0.4 + Math.random() * 0.9;
+          spark._age = 0;
+          spark._rotSpeed = (Math.random() - 0.5) * 15;
+          scene.add(spark);
+          fx.sparks.push(spark);
+        }
+
+        // 3. 바닥 균열 라이트 (포인트 라이트 폭발)
+        const crackLight = new THREE.PointLight(0x00ff88, 8, 6);
+        crackLight.position.copy(position);
+        crackLight.position.y = position.y - WORLD.eyeHeight + 0.3;
+        scene.add(crackLight);
+        fx.cracks = crackLight;
+
+        // 4. 바닥 균열 데칼 (원형 메쉬)
+        const crackGeo = new THREE.CircleGeometry(0.3, 12);
+        const crackMat = new THREE.MeshBasicMaterial({
+          color: 0x00ff88,
+          transparent: true,
+          opacity: 0.9,
+          blending: THREE.AdditiveBlending,
+          side: THREE.DoubleSide,
+        });
+        const crackMesh = new THREE.Mesh(crackGeo, crackMat);
+        crackMesh.position.copy(position);
+        crackMesh.position.y = position.y - WORLD.eyeHeight + 0.02;
+        crackMesh.rotation.x = -Math.PI / 2;
+        scene.add(crackMesh);
+        fx.crackMesh = crackMesh;
+
+        // 5. 에너지 기둥 (수직 빔)
+        const beamGeo = new THREE.CylinderGeometry(0.08, 0.35, 4.4, 12, 1, true);
+        const beamMat = new THREE.MeshBasicMaterial({
+          color: 0x00ff88,
+          transparent: true,
+          opacity: 0.45,
+          blending: THREE.AdditiveBlending,
+          side: THREE.DoubleSide,
+        });
+        const beam = new THREE.Mesh(beamGeo, beamMat);
+        beam.position.copy(position);
+        beam.position.y = position.y - WORLD.eyeHeight + 2.2;
+        scene.add(beam);
+        fx.beam = beam;
+
+        // 화면 효과
+        this.shakeIntensity = 0.35;
+        this.flashAlpha = 1.0;
+
+        this.active.push(fx);
+      },
+
+      // 프레임 업데이트
+      update(dt) {
+        // 화면 흔들림 감쇠
+        if (this.shakeIntensity > 0) {
+          player.position.x += (Math.random() - 0.5) * this.shakeIntensity;
+          player.position.y += (Math.random() - 0.5) * this.shakeIntensity * 0.5;
+          this.shakeIntensity *= Math.pow(0.02, dt);
+          if (this.shakeIntensity < 0.003) this.shakeIntensity = 0;
+        }
+
+        // 화면 플래시 감쇠
+        if (this.flashAlpha > 0) {
+          this.flashAlpha -= dt * 4;
+          if (this.flashAlpha < 0) this.flashAlpha = 0;
+          const dmg = document.getElementById("damage");
+          if (dmg) {
+            dmg.style.boxShadow = `inset 0 0 80px rgba(0, 255, 136, ${this.flashAlpha * 0.5})`;
+            if (this.flashAlpha <= 0) dmg.style.boxShadow = "";
+          }
+        }
+
+        // 이펙트 업데이트
+        for (let i = this.active.length - 1; i >= 0; i--) {
+          const fx = this.active[i];
+          fx.age += dt;
+
+          // 충격파 링
+          for (const ring of fx.rings) {
+            const t = fx.age - ring._delay;
+            if (t < 0) continue;
+            const progress = t / 0.7;
+            const s = Math.min(progress * ring._speed, ring._maxScale);
+            ring.scale.set(s, s, s);
+            ring.material.opacity = Math.max(0, 1 - progress * 1.2);
+          }
+
+          // 스파크 파티클
+          for (const spark of fx.sparks) {
+            spark._age += dt;
+            spark._vel.y += spark._gravity * dt;
+            spark.position.add(spark._vel.clone().multiplyScalar(dt));
+            spark.rotation.x += spark._rotSpeed * dt;
+            spark.rotation.z += spark._rotSpeed * 0.7 * dt;
+            const lifeRatio = spark._age / spark._life;
+            spark.material.opacity = Math.max(0, 1 - lifeRatio);
+            const sparkScale = 1 + lifeRatio * 0.5;
+            spark.scale.set(sparkScale, sparkScale, sparkScale);
+          }
+
+          // 균열 라이트 감쇠
+          if (fx.cracks) {
+            fx.cracks.intensity = Math.max(0, 8 * (1 - fx.age / 0.8));
+          }
+
+          // 균열 데칼 확대 & 페이드
+          if (fx.crackMesh) {
+            const crackProgress = Math.min(fx.age / 0.5, 1);
+            const crackScale = 0.3 + crackProgress * 2.5;
+            fx.crackMesh.scale.set(crackScale, crackScale, 1);
+            fx.crackMesh.material.opacity = Math.max(0, 0.9 * (1 - fx.age / 1.5));
+          }
+
+          // 에너지 빔 페이드
+          if (fx.beam) {
+            const beamProgress = fx.age / 0.6;
+            fx.beam.material.opacity = Math.max(0, 0.45 * (1 - beamProgress));
+            fx.beam.scale.x = 1 + beamProgress * 0.5;
+            fx.beam.scale.z = 1 + beamProgress * 0.5;
+          }
+
+          // 정리
+          if (fx.age > fx.maxAge) {
+            for (const ring of fx.rings) { scene.remove(ring); ring.geometry.dispose(); ring.material.dispose(); }
+            for (const spark of fx.sparks) { scene.remove(spark); spark.geometry.dispose(); spark.material.dispose(); }
+            if (fx.cracks) scene.remove(fx.cracks);
+            if (fx.crackMesh) { scene.remove(fx.crackMesh); fx.crackMesh.geometry.dispose(); fx.crackMesh.material.dispose(); }
+            if (fx.beam) { scene.remove(fx.beam); fx.beam.geometry.dispose(); fx.beam.material.dispose(); }
+            this.active.splice(i, 1);
+          }
+        }
+      },
+    };
+
+    function ringNearestDoor() {
+      if (!state.started) return;
+      const door = getNearestDoor(1.75);
+      if (!door || door.cooldown > 0 || door.state !== "closed") return;
+      door.state = "waiting";
+      door.openT = door.type.delay;
+      door.cooldown = 9;
+      door.bell.material.emissiveIntensity = 6.5;
+      state.notoriety = Math.min(25, state.notoriety + 2);
+      state.score += 100 * state.combo;
+      state.combo = Math.min(9, state.combo + 1);
+      state.comboTimer = 6;
+      beep("bell");
+      spawnGoodChance();
+
+      // 🔨 해머 슬램 이펙트 발동!
+      hammerVFX.spawn(player.position);
+    }
+
+    function getNearestDoor(maxDist) {
+      let best = null;
+      let bestDist = maxDist;
+      for (const door of doors) {
+        if (door.floor !== state.floor) continue;
+        const pos = new THREE.Vector3(door.side * (WORLD.halfWidth - 0.15), state.floor * WORLD.floorHeight + 1.3, door.z);
+        const dist = player.position.distanceTo(pos);
+        if (dist < bestDist) {
+          bestDist = dist;
+          best = door;
+        }
+      }
+      return best;
+    }
+
+    function updateDoors(dt) {
+      for (const door of doors) {
+        door.cooldown = Math.max(0, door.cooldown - dt);
+        if (door.bell.material.emissiveIntensity > 2.6) {
+          door.bell.material.emissiveIntensity = Math.max(2.6, door.bell.material.emissiveIntensity - dt * 8);
+        }
+        if (door.state === "waiting") {
+          door.openT -= dt;
+          if (door.openT <= 0) {
+            door.state = "open";
+            door.openT = 3.7;
+            door.warm.intensity = 2.4;
+            openDoorMesh(door, true);
+            spawnNpc(door);
+          }
+        } else if (door.state === "open") {
+          door.openT -= dt;
+          if (door.openT <= 0) {
+            door.state = "closing";
+          }
+        } else if (door.state === "closing") {
+          door.state = "closed";
+          door.warm.intensity = 0;
+          openDoorMesh(door, false);
+          door.npcSpawned = false;
+        }
+      }
+    }
+
+    function openDoorMesh(door, open) {
+      door.mesh.rotation.y = open ? door.side * 0.72 : 0;
+      door.mesh.position.x = open ? -0.42 : 0;
+    }
+
+    function spawnNpc(door) {
+      if (door.npcSpawned) return;
+      door.npcSpawned = true;
+      const type = door.type;
+      const npc = {
+        type,
+        floor: door.floor,
+        side: door.side,
+        position: new THREE.Vector3(door.side * (WORLD.halfWidth - 0.72), door.floor * WORLD.floorHeight, door.z),
+        home: new THREE.Vector3(door.side * (WORLD.halfWidth - 0.72), door.floor * WORLD.floorHeight, door.z),
+        age: 0,
+        alert: 1.8,
+        thrown: false,
+        mesh: makeNpcMesh(type),
+      };
+      npc.mesh.position.copy(npc.position);
+      scene.add(npc.mesh);
+      npcs.push(npc);
+
+      if (type.action === "alarm") {
+        state.notoriety = Math.min(25, state.notoriety + 2);
+        for (const other of doors.filter((d) => d.floor === door.floor && d !== door).sort(() => Math.random() - 0.5).slice(0, 2)) {
+          if (other.state === "closed") {
+            other.state = "waiting";
+            other.openT = 1.8;
+            other.cooldown = 8;
+          }
+        }
+      }
+
+      if (type.action === "guard") {
+        state.notoriety = Math.min(25, state.notoriety + 4);
+        spawnRobot(door.floor);
+        for (const targetFloor of [door.floor - 1, door.floor + 1]) {
+          if (targetFloor < 0 || targetFloor >= WORLD.floors) continue;
+          const remoteDoors = doors.filter((d) => d.floor === targetFloor && d.state === "closed").sort(() => Math.random() - 0.5);
+          for (const remote of remoteDoors.slice(0, 2)) {
+            remote.state = "waiting";
+            remote.openT = 2.25 + Math.random() * 0.7;
+            remote.cooldown = 10;
+          }
+        }
+      }
+    }
+
+    function makeNpcMesh(type) {
+      const group = new THREE.Group();
+      const mat = new THREE.MeshStandardMaterial({
+        color: type.color,
+        emissive: type.color,
+        emissiveIntensity: type.id === "Ghost" ? 1.2 : 0.28,
+        transparent: Boolean(type.opacity),
+        opacity: type.opacity ?? 1,
+        roughness: 0.48,
+      });
+
+      const body = new THREE.Mesh(new THREE.CapsuleGeometry(0.34, 0.82, 8, 16), mat);
+      body.position.y = 0.95;
+      const head = new THREE.Mesh(new THREE.SphereGeometry(0.25, 20, 14), mat);
+      head.position.y = 1.6;
+      const visor = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.08, 0.04), materials.ledCyan);
+      visor.position.set(0, 1.64, -0.22);
+      group.add(body, head, visor);
+
+      const label = makeTextSprite(type.name, "#ffffff", 0.8);
+      label.position.set(0, 2.05, 0);
+      label.scale.set(0.76, 0.22, 1);
+      group.add(label);
+      return group;
+    }
+
+    function updateNpcs(dt) {
+      for (let i = npcs.length - 1; i >= 0; i -= 1) {
+        const npc = npcs[i];
+        npc.age += dt;
+        npc.alert -= dt;
+        const playerFlat = new THREE.Vector3(player.position.x, npc.position.y, player.position.z);
+        const toPlayer = playerFlat.clone().sub(npc.position);
+        const dist = toPlayer.length();
+        const dir = toPlayer.lengthSq() > 0 ? toPlayer.normalize() : tmpVec.set(0, 0, 1);
+
+        if (npc.floor === state.floor && dist < npc.type.range + state.notoriety * 0.14 && canSeePlayer(npc, dir, dist)) {
+          if (npc.type.action === "stun" && state.stunTimer <= 0) {
+            state.stunTimer = 2.1;
+          }
+          if (npc.type.action === "slipper" && !npc.thrown && dist < npc.type.range * 0.9) {
+            npc.thrown = true;
+            spawnSlipper(npc.position.clone().add(new THREE.Vector3(0, 1.25, 0)), dir.clone(), npc.floor);
+          }
+          const chaseSpeed = npc.type.speed * (state.notoriety > 12 ? 1.2 : 1);
+          npc.position.addScaledVector(dir, chaseSpeed * dt);
+          npc.mesh.lookAt(player.position.x, npc.position.y + 1.1, player.position.z);
+          if (dist < 0.72) caught(`${npc.type.name}에게 잡혔습니다`);
+        } else {
+          const homeDir = npc.home.clone().sub(npc.position);
+          const homeDist = homeDir.length();
+          if (homeDist > 0.08) npc.position.addScaledVector(homeDir.normalize(), npc.type.speed * 0.45 * dt);
+        }
+
+        npc.mesh.position.copy(npc.position);
+        npc.mesh.position.y += Math.sin(npc.age * 7) * 0.035;
+
+        if (npc.age > 12 && npc.position.distanceTo(npc.home) < 0.28) {
+          scene.remove(npc.mesh);
+          npcs.splice(i, 1);
+        }
+      }
+    }
+
+    function canSeePlayer(observer, dir, dist) {
+      const forward = new THREE.Vector3(-observer.side, 0, 0);
+      const facingScore = forward.dot(dir);
+      if (facingScore < observer.type.fov && observer.alert <= 0) return false;
+      const origin = observer.position.clone().add(new THREE.Vector3(0, 1.45, 0));
+      const target = player.position.clone();
+      const rayDir = target.sub(origin).normalize();
+      raycaster.set(origin, rayDir);
+      raycaster.far = dist;
+      const blockers = obstacles.filter((o) => o.floor === observer.floor).map((o) => o.mesh);
+      const hits = raycaster.intersectObjects(blockers, false);
+      return hits.length === 0;
+    }
+
+    function spawnSlipper(origin, direction, floor) {
+      const slipper = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.12, 0.22), new THREE.MeshStandardMaterial({ color: 0xd6c199, roughness: 0.8 }));
+      slipper.position.copy(origin);
+      scene.add(slipper);
+      slippers.push({ mesh: slipper, floor, velocity: direction.multiplyScalar(6.2).add(new THREE.Vector3(0, 0.15, 0)), age: 0 });
+    }
+
+    function updateSlippers(dt) {
+      for (let i = slippers.length - 1; i >= 0; i -= 1) {
+        const s = slippers[i];
+        s.age += dt;
+        s.mesh.position.addScaledVector(s.velocity, dt);
+        s.mesh.rotation.x += dt * 9;
+        s.mesh.rotation.y += dt * 5;
+        if (s.floor === state.floor && s.mesh.position.distanceTo(player.position) < 0.55) {
+          caught("슬리퍼 직격");
+        }
+        if (s.age > 2.5) {
+          scene.remove(s.mesh);
+          slippers.splice(i, 1);
+        }
+      }
+    }
+
+    function updateDrones(dt) {
+      state.droneTimer -= dt;
+      if (state.notoriety >= 13 && state.droneTimer <= 0) {
+        spawnDrone();
+        state.droneTimer = 8;
+      }
+
+      for (let i = drones.length - 1; i >= 0; i -= 1) {
+        const drone = drones[i];
+        drone.age += dt;
+        drone.angle += dt * drone.speed;
+        drone.mesh.position.set(
+          Math.sin(drone.angle) * 2.8,
+          drone.floor * WORLD.floorHeight + 2.15 + Math.sin(drone.age * 3) * 0.18,
+          drone.z + Math.cos(drone.angle * 0.8) * 3.2
+        );
+        if (drone.floor === state.floor && drone.mesh.position.distanceTo(player.position) < 6 && hasLineOfSight(drone.mesh.position, player.position, drone.floor)) {
+          state.notoriety = Math.min(25, state.notoriety + dt * 0.65);
+          if (drone.mesh.position.distanceTo(player.position) < 2.2) caught("드론 스캔에 포착");
+        }
+        if (drone.age > 28) {
+          scene.remove(drone.mesh);
+          drones.splice(i, 1);
+        }
+      }
+    }
+
+    function spawnDrone() {
+      const mesh = new THREE.Group();
+      const core = new THREE.Mesh(new THREE.SphereGeometry(0.22, 24, 16), materials.drone);
+      const ring = new THREE.Mesh(new THREE.TorusGeometry(0.46, 0.025, 8, 36), materials.ledPink);
+      ring.rotation.x = Math.PI / 2;
+      mesh.add(core, ring);
+      const floor = state.floor;
+      scene.add(mesh);
+      drones.push({ mesh, floor, z: player.position.z + (Math.random() - 0.5) * 18, angle: Math.random() * Math.PI * 2, speed: 1.2 + Math.random(), age: 0 });
+    }
+
+    function updateRobots(dt) {
+      state.robotTimer -= dt;
+      if (state.notoriety >= 21 && state.robotTimer <= 0) {
+        spawnRobot(state.floor);
+        state.robotTimer = 10;
+      }
+
+      for (let i = robots.length - 1; i >= 0; i -= 1) {
+        const robot = robots[i];
+        robot.age += dt;
+        robot.position.z += robot.dir * 1.55 * dt;
+        if (robot.position.z > WORLD.length / 2 - 3 || robot.position.z < -WORLD.length / 2 + 3) robot.dir *= -1;
+        robot.mesh.position.copy(robot.position);
+        robot.mesh.lookAt(robot.position.x, robot.position.y + 1, robot.position.z + robot.dir);
+        if (robot.floor === state.floor && robot.position.distanceTo(new THREE.Vector3(player.position.x, robot.position.y, player.position.z)) < 1.45) {
+          caught("로봇 경비에게 검거");
+        }
+        if (robot.age > 36) {
+          scene.remove(robot.mesh);
+          robots.splice(i, 1);
+        }
+      }
+    }
+
+    function spawnRobot(floor) {
+      const mesh = new THREE.Group();
+      const body = new THREE.Mesh(new THREE.BoxGeometry(0.62, 1.12, 0.48), materials.robot);
+      body.position.y = 0.9;
+      const head = new THREE.Mesh(new THREE.BoxGeometry(0.46, 0.32, 0.36), materials.robot);
+      head.position.y = 1.62;
+      const eye = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.05, 0.04), materials.bell);
+      eye.position.set(0, 1.64, -0.21);
+      mesh.add(body, head, eye);
+      const z = player.position.z > 0 ? -WORLD.length / 2 + 4 : WORLD.length / 2 - 4;
+      const position = new THREE.Vector3(0, floor * WORLD.floorHeight, z);
+      mesh.position.copy(position);
+      scene.add(mesh);
+      robots.push({ mesh, floor, position, dir: z < 0 ? 1 : -1, age: 0 });
+    }
+
+    function updateGoodEvents(dt) {
+      state.goodSpawnTimer -= dt;
+      if (state.goodSpawnTimer <= 0) {
+        state.goodSpawnTimer = 10 + Math.random() * 10;
+        if (goodEvents.filter((e) => e.floor === state.floor).length < 2) spawnGoodEvent(state.floor);
+      }
+
+      for (const event of goodEvents) {
+        event.mesh.rotation.y += dt * 1.5;
+        event.light.intensity = 0.8 + Math.sin(clock.elapsedTime * 5) * 0.35;
+      }
+    }
+
+    function spawnGoodChance() {
+      if (Math.random() < 0.24 && goodEvents.filter((e) => e.floor === state.floor).length < 2) spawnGoodEvent(state.floor);
+    }
+
+    function spawnGoodEvent(floor) {
+      const info = GOOD_DEEDS[Math.floor(Math.random() * GOOD_DEEDS.length)];
+      const group = new THREE.Group();
+      const mat = new THREE.MeshStandardMaterial({ color: info.color, emissive: info.color, emissiveIntensity: 0.8, roughness: 0.4 });
+      let shape;
+      if (info.kind === "cat") shape = new THREE.Mesh(new THREE.SphereGeometry(0.3, 18, 12), mat);
+      else if (info.kind === "package") shape = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.42, 0.55), mat);
+      else shape = new THREE.Mesh(new THREE.OctahedronGeometry(0.34), mat);
+      shape.position.y = 0.52;
+      group.add(shape);
+      const label = makeTextSprite(info.label, "#ffffff", 0.72);
+      label.position.y = 1.16;
+      label.scale.set(1.25, 0.22, 1);
+      group.add(label);
+      const z = THREE.MathUtils.randFloatSpread(WORLD.length - 12);
+      const x = Math.random() > 0.5 ? 2.25 : -2.25;
+      group.position.set(x, floor * WORLD.floorHeight, z);
+      const light = new THREE.PointLight(info.color, 1.1, 4, 2);
+      light.position.set(x, floor * WORLD.floorHeight + 0.8, z);
+      scene.add(group, light);
+      goodEvents.push({ mesh: group, light, floor, label: info.label });
+    }
+
+    function doGoodDeed() {
+      let index = -1;
+      let bestDist = 1.65;
+      for (let i = 0; i < goodEvents.length; i += 1) {
+        const event = goodEvents[i];
+        if (event.floor !== state.floor) continue;
+        const dist = event.mesh.position.distanceTo(new THREE.Vector3(player.position.x, event.mesh.position.y, player.position.z));
+        if (dist < bestDist) {
+          bestDist = dist;
+          index = i;
+        }
+      }
+      if (index === -1) return;
+      const event = goodEvents[index];
+      scene.remove(event.mesh, event.light);
+      goodEvents.splice(index, 1);
+      state.goodDeeds += 1;
+      state.notoriety = Math.max(0, state.notoriety - 4);
+      state.score += 150;
+      beep("good");
+    }
+
+    function updateAtmosphere(dt) {
+      for (const item of flickerLights) {
+        const r = Math.sin(clock.elapsedTime * 19 + item.phase) * 0.15 + Math.random() * 0.08;
+        const blackout = Math.sin(clock.elapsedTime * 2.7 + item.phase) > 0.985 ? 0.15 : 1;
+        item.light.intensity = item.base * (0.85 + r) * blackout;
+        item.mesh.material.emissiveIntensity = item.light.intensity * 0.9;
+      }
+
+      for (const drop of rainDrops) {
+        drop.mesh.position.y -= drop.speed * dt;
+        if (drop.mesh.position.y < drop.floor * WORLD.floorHeight + 0.55) {
+          drop.mesh.position.y = drop.floor * WORLD.floorHeight + 3.0;
+          drop.mesh.position.x = (Math.random() - 0.5) * 7;
+        }
+      }
+
+      for (const cctv of cctvs) {
+        cctv.yaw += dt * 0.9;
+        cctv.group.rotation.y = Math.sin(cctv.yaw) * 0.65;
+        if (state.notoriety >= 6 && cctv.floor === state.floor && cctv.group.position.distanceTo(player.position) < 8) {
+          state.notoriety = Math.min(25, state.notoriety + dt * 0.25);
+        }
+      }
+    }
+
+    function updatePrompt() {
+      const prompts = [];
+      const door = getNearestDoor(1.65);
+      if (door && door.state === "closed" && door.cooldown <= 0) prompts.push(`E  ${door.type.name} 집 초인종`);
+      if (door && door.cooldown > 0) prompts.push("문 앞이 아직 소란스럽습니다");
+      for (const event of goodEvents) {
+        if (event.floor !== state.floor) continue;
+        const dist = event.mesh.position.distanceTo(new THREE.Vector3(player.position.x, event.mesh.position.y, player.position.z));
+        if (dist < 1.7) prompts.push(`F  ${event.label}`);
+      }
+      if (Math.abs(player.position.z - (WORLD.length / 2 - 2.5)) < 4) prompts.push("↑/↓  엘리베이터 또는 계단");
+      if (state.stunTimer > 0) prompts.push("고양이에게 발목을 잡혔습니다");
+      hud.prompt.textContent = prompts.join("   |   ");
+      hud.prompt.classList.toggle("show", prompts.length > 0);
+    }
+
+    function updateHud() {
+      hud.score.textContent = Math.floor(state.score).toString();
+      hud.combo.textContent = `x${state.combo}`;
+      hud.lives.textContent = state.lives.toString();
+      hud.floor.textContent = `${state.floor + 1}F`;
+      hud.good.textContent = state.goodDeeds.toString();
+      hud.notorietyText.textContent = `${Math.floor(state.notoriety)} / 25`;
+      hud.notorietyFill.style.width = `${Math.min(100, (state.notoriety / 25) * 100)}%`;
+      hud.threat.textContent = threatLabel();
+    }
+
+    function threatLabel() {
+      if (state.notoriety <= 5) return "평화";
+      if (state.notoriety <= 12) return "CCTV";
+      if (state.notoriety <= 20) return "드론";
+      return "로봇";
+    }
+
+    function changeFloor(delta) {
+      if (!state.started) return;
+      const nearTransit = Math.abs(player.position.z - (WORLD.length / 2 - 2.5)) < 7 || Math.abs(player.position.z + (WORLD.length / 2 - 2.5)) < 3;
+      if (!nearTransit) return;
+      const next = THREE.MathUtils.clamp(state.floor + delta, 0, WORLD.floors - 1);
+      if (next === state.floor) return;
+      state.floor = next;
+      player.position.y = state.floor * WORLD.floorHeight + WORLD.eyeHeight;
+      player.position.z = WORLD.length / 2 - 4.4;
+      state.notoriety = Math.max(0, state.notoriety - 1);
+      beep("elevator");
+    }
+
+    function caught(reason) {
+      if (state.caughtCooldown > 0) return;
+      state.caughtCooldown = 2.4;
+      state.lives -= 1;
+      state.combo = 1;
+      state.comboTimer = 0;
+      state.notoriety = Math.min(25, state.notoriety + 3);
+      beep("alarm");
+      hud.damage.classList.add("show");
+      setTimeout(() => hud.damage.classList.remove("show"), 260);
+      if (state.lives <= 0) {
+        state.lives = 3;
+        state.score = Math.max(0, state.score - 500);
+        state.notoriety = 0;
+        state.floor = 0;
+      }
+      player.position.set(0, state.floor * WORLD.floorHeight + WORLD.eyeHeight, 24);
+      hud.prompt.textContent = reason;
+      hud.prompt.classList.add("show");
+    }
+
+    function hasLineOfSight(from, to, floor) {
+      const dist = from.distanceTo(to);
+      const dir = to.clone().sub(from).normalize();
+      raycaster.set(from, dir);
+      raycaster.far = dist;
+      const blockers = obstacles.filter((o) => o.floor === floor).map((o) => o.mesh);
+      return raycaster.intersectObjects(blockers, false).length === 0;
+    }
+  </script>
+</body>
+</html>
