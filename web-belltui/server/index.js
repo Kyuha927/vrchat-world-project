@@ -1,0 +1,240 @@
+// server/index.js — Asymmetric multiplayer: Streamer (Choroki) vs Fans (Neighbors)
+const express = require('express');
+const http = require('http');
+const { Server } = require('socket.io');
+const path = require('path');
+const GameRoom = require('./GameRoom');
+
+const app = express();
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: { origin: '*', methods: ['GET', 'POST'] },
+});
+
+// Serve static files from parent directory
+app.use(express.static(path.join(__dirname, '..')));
+
+const rooms = new Map();
+
+function genCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let code = '';
+  for (let i = 0; i < 4; i++) code += chars[Math.floor(Math.random() * chars.length)];
+  return rooms.has(code) ? genCode() : code;
+}
+
+// Cleanup stale rooms
+setInterval(() => {
+  const now = Date.now();
+  for (const [code, room] of rooms) {
+    if (room.isEmpty() || now - room.created > 60 * 60 * 1000) {
+      rooms.delete(code);
+      console.log(`[x] Room ${code} expired`);
+    }
+  }
+}, 60 * 1000);
+
+// Game loop — 20Hz
+setInterval(() => {
+  for (const [code, room] of rooms) {
+    if (room.state === 'play' || room.state === 'countdown') {
+      room.update();
+
+      // Send full state to host
+      io.to(`host_${code}`).emit('state', room.getSnapshot());
+
+      // Send lightweight fan-specific state to each fan
+      for (const fan of room.fans.values()) {
+        if (fan.connected) {
+          io.to(fan.id).emit('fanState', {
+            state: room.state,
+            timeLeft: Math.ceil(room.gameTimer / 20),
+            countdown: Math.ceil(room.countdownTimer / 20),
+            hostState: room.hostState,
+            myDoor: fan.assignedDoor,
+            myDoorState: fan.doorState,
+            trapReady: fan.trapReady,
+            trapCooldown: Math.ceil(fan.trapCooldown / 20),
+            catchCount: fan.catchCount,
+            fanCount: room.fans.size,
+          });
+        }
+      }
+
+      if (room.state === 'result') {
+        const results = room.getResults();
+        io.to(code).emit('result', results);
+      }
+    }
+  }
+}, 50);
+
+io.on('connection', (socket) => {
+  let currentRoom = null;
+  let role = null; // 'host' | 'fan'
+  let playerName = 'Guest';
+
+  socket.on('setName', (name) => {
+    playerName = (name || 'Guest').substring(0, 12);
+  });
+
+  // === HOST (Streamer) ===
+  socket.on('createRoom', (data, callback) => {
+    const code = genCode();
+    playerName = (data?.name || '쵸로키').substring(0, 12);
+    const room = new GameRoom(code, socket.id, playerName);
+    rooms.set(code, room);
+    currentRoom = code;
+    role = 'host';
+    socket.join(code);
+    socket.join(`host_${code}`);
+
+    console.log(`[HOST] Room ${code} created by ${playerName}`);
+    callback({ ok: true, code, snapshot: room.getSnapshot() });
+  });
+
+  socket.on('hostStart', () => {
+    if (!currentRoom || role !== 'host') return;
+    const room = rooms.get(currentRoom);
+    if (!room || room.state !== 'lobby') return;
+    if (room.fans.size < 1) return;
+
+    room.startCountdown();
+    io.to(currentRoom).emit('countdown', room.getSnapshot());
+    console.log(`[HOST] Game starting in room ${currentRoom}`);
+  });
+
+  socket.on('hostState', (state) => {
+    if (!currentRoom || role !== 'host') return;
+    const room = rooms.get(currentRoom);
+    if (!room || room.state !== 'play') return;
+    room.updateHostState(state);
+  });
+
+  socket.on('bellRung', (data) => {
+    if (!currentRoom || role !== 'host') return;
+    const room = rooms.get(currentRoom);
+    if (!room || room.state !== 'play') return;
+
+    const evt = room.bellRung(data.floor, data.doorIdx);
+    if (evt) {
+      // Notify the specific fan that their bell was rung
+      io.to(evt.fanId).emit('bellRung', { floor: evt.floor, doorIdx: evt.doorIdx });
+      // Notify host too
+      socket.emit('gameEvent', evt);
+    }
+  });
+
+  socket.on('hostCaught', (data) => {
+    if (!currentRoom || role !== 'host') return;
+    const room = rooms.get(currentRoom);
+    if (!room) return;
+
+    const evt = room.hostCaught(data.fanId);
+    if (evt) {
+      io.to(currentRoom).emit('gameEvent', evt);
+    }
+  });
+
+  // === FAN (Neighbor) ===
+  socket.on('joinAsNeighbor', (data, callback) => {
+    const code = (data?.code || '').toUpperCase().trim();
+    playerName = (data?.name || '팬').substring(0, 12);
+
+    const room = rooms.get(code);
+    if (!room) return callback({ ok: false, err: '방을 찾을 수 없습니다' });
+    if (room.state !== 'lobby') return callback({ ok: false, err: '이미 게임이 진행 중입니다' });
+
+    const result = room.addFan(socket.id, playerName);
+    if (!result.ok) return callback({ ok: false, err: result.err });
+
+    currentRoom = code;
+    role = 'fan';
+    socket.join(code);
+
+    console.log(`[FAN] ${playerName} joined room ${code} (${room.fans.size}/${room.maxFans})`);
+    callback({ ok: true, fan: result.fan, snapshot: room.getSnapshot() });
+
+    // Notify host of new fan
+    io.to(`host_${code}`).emit('fanJoined', {
+      name: playerName,
+      count: room.fans.size,
+      snapshot: room.getSnapshot(),
+    });
+
+    // Notify all fans
+    io.to(code).emit('lobbyUpdate', { fanCount: room.fans.size });
+  });
+
+  socket.on('fanReady', (ready) => {
+    if (!currentRoom || role !== 'fan') return;
+    const room = rooms.get(currentRoom);
+    if (!room) return;
+    room.setFanReady(socket.id, ready);
+    io.to(`host_${currentRoom}`).emit('fanReadyUpdate', room.getSnapshot());
+  });
+
+  socket.on('fanAction', (action) => {
+    if (!currentRoom || role !== 'fan') return;
+    const room = rooms.get(currentRoom);
+    if (!room || room.state !== 'play') return;
+
+    const evt = room.fanAction(socket.id, action);
+    if (evt) {
+      // Broadcast event to host and all fans
+      io.to(currentRoom).emit('gameEvent', evt);
+    }
+  });
+
+  socket.on('fanReaction', (emoji) => {
+    if (!currentRoom || role !== 'fan') return;
+    const room = rooms.get(currentRoom);
+    if (!room) return;
+
+    const evt = room.fanAction(socket.id, { type: 'reaction', emoji });
+    if (evt) {
+      io.to(currentRoom).emit('gameEvent', evt);
+    }
+  });
+
+  // === COMMON ===
+  socket.on('chat', (msg) => {
+    if (!currentRoom) return;
+    msg = (msg || '').substring(0, 100);
+    io.to(currentRoom).emit('chat', {
+      name: playerName,
+      role,
+      msg,
+    });
+  });
+
+  socket.on('disconnect', () => {
+    if (!currentRoom) return;
+    const room = rooms.get(currentRoom);
+    if (!room) return;
+
+    if (role === 'host') {
+      // Host left — end the room
+      io.to(currentRoom).emit('hostLeft');
+      rooms.delete(currentRoom);
+      console.log(`[HOST] ${playerName} left, room ${currentRoom} closed`);
+    } else if (role === 'fan') {
+      room.removeFan(socket.id);
+      io.to(`host_${currentRoom}`).emit('fanLeft', {
+        name: playerName,
+        count: room.fans.size,
+        snapshot: room.getSnapshot(),
+      });
+      console.log(`[FAN] ${playerName} left room ${currentRoom}`);
+    }
+    currentRoom = null;
+    role = null;
+  });
+});
+
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => {
+  console.log(`🔔 Belltui Server — http://localhost:${PORT}`);
+  console.log(`   Host:  http://localhost:${PORT}/index.html`);
+  console.log(`   Fan:   http://localhost:${PORT}/fan.html`);
+});

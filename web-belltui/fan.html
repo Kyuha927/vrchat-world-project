@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>🚪 벨튀 — 이웃 참여</title>
+<meta name="description" content="벨튀 대작전에 이웃으로 참여하세요! 쵸로키를 잡아라!">
+<link rel="stylesheet" href="fan.css">
+</head>
+<body>
+  <div id="app">
+    <!-- JOIN Screen -->
+    <div id="join-screen" class="screen active">
+      <div class="logo">🚪</div>
+      <h1>벨튀 이웃 참여</h1>
+      <p class="sub">스트리머의 방 코드를 입력하세요</p>
+      <input id="input-code" type="text" maxlength="4" placeholder="ABCD" autocomplete="off" autocapitalize="characters">
+      <input id="input-name" type="text" maxlength="12" placeholder="닉네임" autocomplete="off">
+      <button id="btn-join" class="btn-primary" onclick="joinRoom()">🏠 입장</button>
+      <p id="join-error" class="error"></p>
+    </div>
+
+    <!-- LOBBY Screen -->
+    <div id="lobby-screen" class="screen">
+      <div class="lobby-header">
+        <span class="room-label">방 코드</span>
+        <span id="lobby-code" class="room-code">----</span>
+      </div>
+      <div id="my-neighbor" class="neighbor-card">
+        <div id="nb-emoji" class="nb-emoji">👵</div>
+        <div id="nb-name" class="nb-name">할머니</div>
+        <div id="nb-trait" class="nb-trait">느린 추격</div>
+      </div>
+      <p class="sub">당신은 <strong id="nb-role">이웃</strong>입니다</p>
+      <div id="fan-count" class="fan-count">참가자: 1명</div>
+      <button id="btn-ready" class="btn-primary" onclick="toggleReady()">✋ 준비!</button>
+      <p class="sub hint">호스트가 게임을 시작하면 자동으로 시작됩니다</p>
+    </div>
+
+    <!-- COUNTDOWN Screen -->
+    <div id="countdown-screen" class="screen">
+      <div class="countdown-num" id="cd-num">3</div>
+      <p>곧 시작됩니다!</p>
+    </div>
+
+    <!-- GAME Screen -->
+    <div id="game-screen" class="screen">
+      <div class="game-header">
+        <div class="timer" id="game-timer">90</div>
+        <div class="catch-count">🎯 <span id="catch-count">0</span></div>
+      </div>
+
+      <!-- Door status display -->
+      <div id="door-status" class="door-panel">
+        <div class="door-visual" id="door-visual">
+          <div class="door-frame">
+            <div class="door-surface" id="door-surface">🚪</div>
+          </div>
+        </div>
+        <div id="door-label" class="door-label">문 닫힘 — 대기 중</div>
+      </div>
+
+      <!-- Action buttons -->
+      <div id="actions" class="action-area">
+        <div id="action-wait" class="action-group active">
+          <p class="action-hint">🔔 벨이 울리면 반응하세요!</p>
+        </div>
+
+        <div id="action-bell" class="action-group">
+          <p class="action-hint">🔔 쵸로키가 벨을 눌렀다!</p>
+          <button class="btn-action btn-open" onclick="openDoor()">🚪 문 열기!</button>
+          <button class="btn-action btn-ignore" onclick="ignoreBell()">😴 무시</button>
+        </div>
+
+        <div id="action-chase" class="action-group">
+          <p class="action-hint">🏃 추격 방향을 선택하세요!</p>
+          <div class="chase-controls">
+            <button class="btn-chase btn-left" ontouchstart="chase(-1)" onmousedown="chase(-1)">◀ 왼쪽</button>
+            <button class="btn-chase btn-trap" onclick="placeTrap()" id="btn-trap">🪤 함정</button>
+            <button class="btn-chase btn-right" ontouchstart="chase(1)" onmousedown="chase(1)">오른쪽 ▶</button>
+          </div>
+          <button class="btn-small btn-retreat" onclick="retreat()">🏠 집으로 돌아가기</button>
+        </div>
+      </div>
+
+      <!-- Reactions -->
+      <div class="reaction-bar">
+        <button class="btn-react" onclick="react('😂')">😂</button>
+        <button class="btn-react" onclick="react('😱')">😱</button>
+        <button class="btn-react" onclick="react('🤬')">🤬</button>
+        <button class="btn-react" onclick="react('👏')">👏</button>
+        <button class="btn-react" onclick="react('💀')">💀</button>
+      </div>
+    </div>
+
+    <!-- RESULT Screen -->
+    <div id="result-screen" class="screen">
+      <h1>🏆 게임 종료!</h1>
+      <div id="result-host" class="result-card"></div>
+      <div id="result-mvp" class="result-card mvp"></div>
+      <div id="result-me" class="result-card me"></div>
+      <button class="btn-primary" onclick="location.reload()">🔄 다시 참여</button>
+    </div>
+
+    <!-- Disconnected -->
+    <div id="dc-screen" class="screen">
+      <div class="logo">😢</div>
+      <h1>연결 끊김</h1>
+      <p>호스트가 방을 종료했거나 연결이 끊어졌습니다</p>
+      <button class="btn-primary" onclick="location.reload()">🔄 다시 참여</button>
+    </div>
+  </div>
+
+  <!-- Floating reactions overlay -->
+  <div id="reactions-overlay"></div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="fan.js"></script>
+</body>
+</html>

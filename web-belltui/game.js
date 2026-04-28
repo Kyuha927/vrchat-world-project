@@ -241,8 +241,114 @@ document.getElementById('fdetail').textContent=`콤보 ${this.maxC} | 선행 ${t
 document.getElementById('fending').textContent=this.goodCount>=5&&nl<=1?'🌟 선행 엔딩: 빌런인 줄 알았더니 동네 히어로!':endings[nl];
 document.getElementById('over').style.display='flex';document.getElementById('hud').classList.add('hid')}
 }
-function go(){if(!ac)ia();startAmb();document.getElementById('title').classList.add('hid');document.getElementById('over').style.display='none';
-document.getElementById('hud').classList.remove('hid');G=new Game();G.upHUD()}
-function lp(){if(G&&G.state!=='over')G.update();if(G)G.draw();requestAnimationFrame(lp)}
+let isMulti=false;
+function go(){if(!ac)ia();startAmb();document.getElementById('title').classList.add('hid');
+document.getElementById('multi-lobby').style.display='none';document.getElementById('multi-lobby').classList.add('hid');
+document.getElementById('over').style.display='none';
+document.getElementById('hud').classList.remove('hid');G=new Game();G.upHUD();
+if(isMulti)startMultiSync()}
+function lp(){if(G&&G.state!=='over'){G.update();if(isMulti&&G.state==='play')sendHostState()}if(G)G.draw();requestAnimationFrame(lp)}
 loadSprites(()=>{document.getElementById('loading').classList.add('hid');document.getElementById('title').classList.remove('hid')});
 lp();
+
+// === Multiplayer Host Functions ===
+async function showMultiLobby(){
+  document.getElementById('title').classList.add('hid');
+  document.getElementById('multi-lobby').style.display='flex';
+  document.getElementById('multi-lobby').classList.remove('hid');
+  try{
+    await NET.connect();
+    NET.setName('쵸로키');
+    const res=await NET.createRoom();
+    if(!res.ok){alert('방 생성 실패');return}
+    document.getElementById('room-code-display').textContent=res.code;
+    document.getElementById('fan-link').textContent=location.origin+'/fan.html?code='+res.code;
+    isMulti=true;
+    // Listen for fan joins
+    NET.socket.on('fanJoined',(data)=>{
+      document.getElementById('fan-counter').textContent=data.count;
+      updateFanList(data.snapshot);
+      if(data.count>=1)document.getElementById('btn-host-start').disabled=false;
+    });
+    NET.socket.on('fanLeft',(data)=>{
+      document.getElementById('fan-counter').textContent=data.count;
+      updateFanList(data.snapshot);
+    });
+    NET.socket.on('fanReadyUpdate',(snapshot)=>{updateFanList(snapshot)});
+    NET.socket.on('gameEvent',(evt)=>{handleMultiEvent(evt)});
+  }catch(e){alert('서버 연결 실패: '+e.message)}
+}
+function updateFanList(snapshot){
+  const el=document.getElementById('fan-names');
+  el.innerHTML=snapshot.fans.map(f=>
+    `<span style="color:${f.ready?'#39FF14':'#889'}">${f.neighborType.emoji}${f.name}${f.ready?' ✓':''}</span>`
+  ).join(' · ');
+}
+function hostStartGame(){
+  if(!NET.socket)return;
+  NET.socket.emit('hostStart');
+  showCharSelect();
+}
+function leaveMulti(){
+  isMulti=false;
+  if(NET.socket)NET.leaveRoom();
+  NET.disconnect();
+  document.getElementById('multi-lobby').style.display='none';
+  document.getElementById('multi-lobby').classList.add('hid');
+  document.getElementById('title').classList.remove('hid');
+}
+let syncTimer=null;
+function startMultiSync(){
+  if(syncTimer)clearInterval(syncTimer);
+  syncTimer=setInterval(()=>{if(G&&isMulti)sendHostState()},50);
+}
+function sendHostState(){
+  if(!G||!NET.socket)return;
+  NET.sendInput({
+    x:G.p.x,y:G.p.y,fl:G.fl,face:G.p.face,vx:G.p.vx,af:G.p.af,
+    score:G.score,combo:G.combo,lives:G.lives,ring:G.p.ring,
+    dash:G.p.dash,notoriety:G.notoriety,goodCount:G.goodCount,state:G.state,
+  });
+}
+// Override bell ring to also notify server
+const _origBell=Game.prototype.update;
+const _wrapUpdate=Game.prototype.update;
+Game.prototype.update=function(){
+  const prevDoors=isMulti?this.floors[this.fl].doors.map(d=>d.st):null;
+  _wrapUpdate.call(this);
+  if(isMulti&&prevDoors){
+    this.floors[this.fl].doors.forEach((d,i)=>{
+      if(prevDoors[i]==='closed'&&d.st==='ring'){
+        NET.socket.emit('bellRung',{floor:this.fl,doorIdx:i});
+      }
+    });
+  }
+};
+function handleMultiEvent(evt){
+  if(!G)return;
+  if(evt.type==='fanOpenDoor'){
+    const fl=G.floors[evt.floor];
+    if(fl&&fl.doors[evt.doorIdx]){
+      const d=fl.doors[evt.doorIdx];
+      if(d.st==='ring'){d.st='open';d.tm=180;d.nx=d.x;neighborSnd(evt.neighborType.trait)}
+    }
+    G.toast(`${evt.fanName}(${evt.neighborType.emoji})이 문을 열었다!`,'bad');
+  }
+  if(evt.type==='fanChase'){
+    const fl=G.floors[evt.floor];
+    if(fl&&fl.doors[evt.doorIdx]){
+      const d=fl.doors[evt.doorIdx];
+      d.st='angry';d.cSpd=evt.speed*1.5;
+    }
+  }
+  if(evt.type==='fanTrap'){
+    G.toast(`${evt.fanName}이 함정을 설치했다! 🪤`,'bad');
+    G.addP(G.p.x,G.p.y-20,'#A855F7',8);
+  }
+  if(evt.type==='fanReaction'){
+    G.popups.push({x:G.p.x+Math.random()*80-40,y:G.p.y-60-Math.random()*40,txt:evt.emoji,life:40,col:'#fff'});
+  }
+  if(evt.type==='catchSuccess'){
+    G.toast(`${evt.fanName}에게 잡혔다! (${evt.total}번째)`,'bad');
+  }
+}
