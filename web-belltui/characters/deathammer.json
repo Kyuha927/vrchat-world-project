@@ -1,0 +1,38 @@
+{
+  "id": "deathammer",
+  "name": "데스헤머",
+  "nameEn": "DeathHammer",
+  "streamer": "쵸로키",
+  "class": "brute",
+  "classLabel": "브루트",
+  "color": "#E94560",
+  "colorSub": "#ff6b81",
+  "emoji": "🔨",
+  "description": "슬레지해머를 든 돌진형 빌런. 시끄럽지만 빠르다!",
+  "stats": {
+    "speed": 4.5,
+    "dashSpeed": 9,
+    "lives": 3,
+    "bellDelay": 1.0,
+    "detectionMod": 1.0
+  },
+  "ability": {
+    "name": "해머 스윙",
+    "nameEn": "Hammer Swing",
+    "description": "주민을 밀어내고 도어를 강제로 연다!",
+    "key": "Q",
+    "type": "hammerSwing",
+    "cooldown": 180,
+    "duration": 15,
+    "range": 80
+  },
+  "sprites": {
+    "idle": "choroki_idle",
+    "run": "choroki_run_v2",
+    "bell": "choroki_bell",
+    "swing": "choroki_swing"
+  },
+  "particleColor": "#E94560",
+  "dashColor": "#A855F7",
+  "trailEffect": "sparks"
+}

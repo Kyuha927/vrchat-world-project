@@ -1,0 +1,38 @@
+{
+  "id": "spark",
+  "name": "스파크",
+  "nameEn": "Spark",
+  "streamer": "",
+  "class": "speed",
+  "classLabel": "스피드",
+  "color": "#ffd166",
+  "colorSub": "#fbbf24",
+  "emoji": "⚡",
+  "description": "벽과 천장을 타고 이동! 감시망을 무시하지만 체력이 낮다.",
+  "stats": {
+    "speed": 5.5,
+    "dashSpeed": 11,
+    "lives": 1,
+    "bellDelay": 0.8,
+    "detectionMod": 1.0
+  },
+  "ability": {
+    "name": "EMP",
+    "nameEn": "EMP Burst",
+    "description": "전자기 펄스! 해당 층 드론 10초 비활성화.",
+    "key": "Q",
+    "type": "emp",
+    "cooldown": 240,
+    "duration": 150,
+    "range": 9999
+  },
+  "sprites": {
+    "idle": "spark_idle",
+    "run": "spark_run",
+    "bell": "spark_bell",
+    "swing": "spark_swing"
+  },
+  "particleColor": "#ffd166",
+  "dashColor": "#f59e0b",
+  "trailEffect": "electric"
+}

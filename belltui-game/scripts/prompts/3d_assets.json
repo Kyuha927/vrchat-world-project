@@ -1,0 +1,356 @@
+{
+  "version": "1.0",
+  "style_prefix": "Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme,",
+  "categories": {
+    "character": {
+      "label": "캐릭터",
+      "assets": [
+        {
+          "id": "choroki_idle",
+          "name": "쵸로키 (데스헤머) idle",
+          "prompt": "chibi girl villain character standing idle pose, black hair with vibrant neon green highlights, green eyes, aviator goggles on head, green and black tactical outfit with glowing circuit patterns, oversized futuristic sledgehammer on her back, neon green accent glow on outfit edges, confident smirk expression, tiny body with big head proportion, full body view",
+          "priority": 1,
+          "poly_target": 8000,
+          "texture_size": 1024
+        },
+        {
+          "id": "choroki_hammer",
+          "name": "쵸로키 해머 스윙",
+          "prompt": "chibi girl villain character in dynamic hammer swing action pose, black hair with green highlights, green tactical outfit, swinging a giant neon green glowing futuristic sledgehammer, motion energy lines, dynamic action pose, full body view",
+          "priority": 1,
+          "poly_target": 10000,
+          "texture_size": 1024
+        },
+        {
+          "id": "npc_grandma",
+          "name": "할머니 NPC",
+          "prompt": "elderly grandmother character, hunched posture, holding a futuristic cane with LED trim, wearing a cyberpunk shawl with subtle neon stitching, grumpy expression, brown and warm tones with purple neon accents, full body view",
+          "priority": 2,
+          "poly_target": 5000,
+          "texture_size": 512
+        },
+        {
+          "id": "npc_muscle",
+          "name": "근육맨 NPC",
+          "prompt": "muscular angry man character, tank top, huge arms, one cybernetic arm implant with red glow, furious expression, dark red color scheme with neon red veins on cyber arm, intimidating stance, full body view",
+          "priority": 2,
+          "poly_target": 6000,
+          "texture_size": 512
+        },
+        {
+          "id": "npc_dog_owner",
+          "name": "강아지 + 주인 NPC",
+          "prompt": "casual person with a cyber-enhanced guard dog on a leash, dog has glowing blue eyes and metallic collar with antenna, owner looks annoyed wearing neon-trimmed hoodie, golden and blue tones, full body view",
+          "priority": 2,
+          "poly_target": 8000,
+          "texture_size": 512
+        },
+        {
+          "id": "npc_ghost",
+          "name": "유령 이웃 NPC",
+          "prompt": "ghostly translucent humanoid figure, holographic glitch effect, flickering edges with digital distortion, purple and indigo ethereal glow, no legs fading into mist particles, eerie but stylized appearance, full body view",
+          "priority": 3,
+          "poly_target": 4000,
+          "texture_size": 512
+        },
+        {
+          "id": "npc_auntie",
+          "name": "아줌마 NPC",
+          "prompt": "middle-aged Korean woman character, hair towel wrap, apron, holding a megaphone with neon pink glow, shouting expression, magenta and pink color scheme with cyberpunk neon trim, full body view",
+          "priority": 2,
+          "poly_target": 5000,
+          "texture_size": 512
+        },
+        {
+          "id": "npc_guard",
+          "name": "경비원 NPC",
+          "prompt": "cyberpunk security guard character, dark blue uniform with neon blue LED trim, visor helmet with HUD display, holding a walkie-talkie with glowing antenna, stern military posture, navy and cyan tones, full body view",
+          "priority": 2,
+          "poly_target": 6000,
+          "texture_size": 512
+        },
+        {
+          "id": "npc_cat",
+          "name": "고양이 NPC",
+          "prompt": "cute cyberpunk cat sitting, glowing orange eyes, tiny LED collar with antenna, fluffy fur with subtle circuit pattern markings, adorable expression, warm orange and purple tones, small scale character",
+          "priority": 2,
+          "poly_target": 3000,
+          "texture_size": 512
+        },
+        {
+          "id": "npc_pajama",
+          "name": "잠옷 아저씨 NPC",
+          "prompt": "sleepy middle-aged man in cyberpunk pajamas and nightcap with LED dots, holding a slipper as weapon in throwing pose, half-closed eyes yawning, olive green and brown tones with subtle neon, full body view",
+          "priority": 3,
+          "poly_target": 5000,
+          "texture_size": 512
+        }
+      ]
+    },
+    "architecture": {
+      "label": "건축/문",
+      "assets": [
+        {
+          "id": "door_closed",
+          "name": "아파트 문 (닫힘)",
+          "prompt": "cyberpunk apartment door closed state, dark brown metal door with rivets, glowing red doorbell button on right side, electronic lock panel with green LED, door number plate on top, dark industrial style, neon trim frame, single door front view",
+          "priority": 1,
+          "poly_target": 2000,
+          "texture_size": 1024
+        },
+        {
+          "id": "door_open",
+          "name": "아파트 문 (열림)",
+          "prompt": "cyberpunk apartment door open state, dark interior visible inside with warm light spilling out, door swung to the left, dark brown metal with electronic lock, neon cyan trim frame, single door front view",
+          "priority": 1,
+          "poly_target": 2000,
+          "texture_size": 1024
+        },
+        {
+          "id": "elevator",
+          "name": "엘리베이터",
+          "prompt": "cyberpunk elevator double sliding doors, dark metallic with holographic floor display panel, neon cyan LED strip frame, futuristic control panel with glowing buttons, industrial sci-fi style, front view",
+          "priority": 2,
+          "poly_target": 3000,
+          "texture_size": 1024
+        },
+        {
+          "id": "stairs_section",
+          "name": "계단 섹션",
+          "prompt": "cyberpunk industrial staircase section with 5 steps, metal grating steps with neon purple LED edge strips, dark concrete walls, safety railing with glowing cyan handrail, atmospheric fog, side view",
+          "priority": 3,
+          "poly_target": 2000,
+          "texture_size": 512
+        },
+        {
+          "id": "wall_panel",
+          "name": "복도 벽 패널",
+          "prompt": "cyberpunk corridor wall panel tile, dark industrial concrete with embedded neon circuit lines, exposed pipe segment, small ventilation grate, subtle purple glow cracks, tileable modular design",
+          "priority": 2,
+          "poly_target": 500,
+          "texture_size": 512
+        },
+        {
+          "id": "ceiling_light",
+          "name": "천장 형광등",
+          "prompt": "cyberpunk industrial ceiling fluorescent light fixture, long rectangular tube light with cool white and blue tint, mounted on dark ceiling bracket, flickering effect design, metal housing with exposed wires",
+          "priority": 3,
+          "poly_target": 500,
+          "texture_size": 256
+        }
+      ]
+    },
+    "props": {
+      "label": "소품",
+      "assets": [
+        {
+          "id": "delivery_boxes",
+          "name": "택배 박스 스택",
+          "prompt": "stack of futuristic delivery boxes, 3 cardboard boxes with holographic shipping labels and glowing barcodes, cyberpunk tape and stamps, small potted plant on top, subtle shadow, items on ground",
+          "priority": 1,
+          "poly_target": 2000,
+          "texture_size": 512
+        },
+        {
+          "id": "potted_plant",
+          "name": "화분",
+          "prompt": "cyberpunk potted plant, dark metallic pot with glowing circuit patterns, green bioluminescent leaves with subtle neon vein patterns, small and decorative, purple ambient glow at base",
+          "priority": 2,
+          "poly_target": 1500,
+          "texture_size": 512
+        },
+        {
+          "id": "cctv_camera",
+          "name": "CCTV 카메라",
+          "prompt": "cyberpunk security camera mounted on wall bracket, dome shape with blinking red LED indicator light, dark metallic body, visible scan cone hologram below showing detection area, small and detailed",
+          "priority": 1,
+          "poly_target": 1000,
+          "texture_size": 256
+        },
+        {
+          "id": "patrol_drone",
+          "name": "순찰 드론",
+          "prompt": "small cyberpunk surveillance drone, quadcopter design with purple neon glow on rotors, single red scanning eye lens, metallic dark carbon body, hovering pose with subtle thrust glow below, compact design",
+          "priority": 1,
+          "poly_target": 2000,
+          "texture_size": 512
+        },
+        {
+          "id": "security_robot",
+          "name": "경비 로봇",
+          "prompt": "cyberpunk security patrol robot, bipedal mechanical design, dark navy body with red warning LED strips, visor head with scanning laser, bulky armored torso, intimidating stance, medium size character",
+          "priority": 2,
+          "poly_target": 6000,
+          "texture_size": 512
+        },
+        {
+          "id": "wall_graffiti",
+          "name": "벽면 낙서 패널",
+          "prompt": "cyberpunk wall graffiti panel, spray-painted sledgehammer logo with VILLAIN text in dripping neon red paint, skull crossbones, on concrete wall segment, vandalism street art cyberpunk style, flat panel",
+          "priority": 3,
+          "poly_target": 500,
+          "texture_size": 512
+        },
+        {
+          "id": "neon_sign",
+          "name": "네온 사인",
+          "prompt": "cyberpunk Korean neon sign, glowing text characters in cyan and pink, mounted on metal bracket, flickering tube light effect, dark background mounting plate, wall-mounted sign",
+          "priority": 2,
+          "poly_target": 800,
+          "texture_size": 512
+        },
+        {
+          "id": "doorbell_button",
+          "name": "벨 버튼",
+          "prompt": "futuristic cyberpunk doorbell button device, small circular glowing button with pink neon ring, mounted on dark metal plate with circuit patterns, small and detailed prop, wall-mounted",
+          "priority": 1,
+          "poly_target": 500,
+          "texture_size": 256
+        }
+      ]
+    },
+    "equipment": {
+      "label": "장비",
+      "assets": [
+        {
+          "id": "sledgehammer",
+          "name": "슬레지해머",
+          "prompt": "futuristic cyberpunk sledgehammer weapon, oversized hammer head with neon green glowing circuit patterns, dark metal handle with grip tape, energy core visible in hammer head, weapon item floating view",
+          "priority": 1,
+          "poly_target": 3000,
+          "texture_size": 512
+        },
+        {
+          "id": "jetpack",
+          "name": "제트팩",
+          "prompt": "compact cyberpunk jetpack equipment, dual thruster nozzles with blue flame glow, dark carbon body with neon green status LEDs, harness straps visible, backpack form factor, equipment item view",
+          "priority": 2,
+          "poly_target": 3000,
+          "texture_size": 512
+        },
+        {
+          "id": "optical_camo",
+          "name": "광학미채 장치",
+          "prompt": "cyberpunk optical camouflage belt device, holographic projector modules on a tactical belt, translucent shimmer effect panels, cyan and purple glow elements, high-tech stealth equipment, item view",
+          "priority": 3,
+          "poly_target": 2000,
+          "texture_size": 512
+        },
+        {
+          "id": "hacking_bracelet",
+          "name": "해킹 팔찌",
+          "prompt": "cyberpunk hacking wrist bracelet, holographic display projected above, circuit board patterns, multiple tiny antennas, green LED indicators, dark metal band with flex segments, wearable tech item view",
+          "priority": 2,
+          "poly_target": 1500,
+          "texture_size": 512
+        },
+        {
+          "id": "toy_hammer_launcher",
+          "name": "뿅망치 런처",
+          "prompt": "cyberpunk toy hammer launcher weapon, gun-shaped device that shoots squeaky hammers, colorful neon pink body with yellow accents, magazine of small hammers visible, playful but high-tech design, weapon item view",
+          "priority": 3,
+          "poly_target": 2500,
+          "texture_size": 512
+        },
+        {
+          "id": "magnetic_boots",
+          "name": "마그네틱 부츠",
+          "prompt": "cyberpunk magnetic boots pair, heavy-duty boots with electromagnetic sole plates glowing blue, dark metal armor plating, power cables running up the sides, neon blue energy rings at soles, footwear item view",
+          "priority": 3,
+          "poly_target": 2000,
+          "texture_size": 512
+        }
+      ]
+    },
+    "good_deeds": {
+      "label": "선행 오브젝트",
+      "assets": [
+        {
+          "id": "stray_cat_bowl",
+          "name": "길고양이 + 밥그릇",
+          "prompt": "thin stray cyberpunk cat sitting next to empty food bowl, big pleading eyes, subtle circuit markings on fur, empty metallic bowl with holographic paw icon, muted orange tones, small scene on ground",
+          "priority": 2,
+          "poly_target": 3000,
+          "texture_size": 512
+        },
+        {
+          "id": "delivery_package",
+          "name": "배달 택배",
+          "prompt": "single futuristic delivery package on ground, holographic shipping label with blinking DELIVER indicator LED, cardboard with metallic cyberpunk tape, small glowing tracking chip, item on ground",
+          "priority": 3,
+          "poly_target": 800,
+          "texture_size": 256
+        },
+        {
+          "id": "broken_light",
+          "name": "고장난 조명",
+          "prompt": "broken cyberpunk corridor light fixture, sparking and flickering with exposed wires, intermittent glow with electrical arcs, cracked glass tube, mounted on ceiling bracket, damaged prop",
+          "priority": 3,
+          "poly_target": 600,
+          "texture_size": 256
+        },
+        {
+          "id": "street_mic",
+          "name": "거리 공연 마이크",
+          "prompt": "cyberpunk street performance microphone on stand, neon pink glowing mic head, dark metal adjustable stand, small holographic speaker at base, stage performance equipment, standing prop",
+          "priority": 3,
+          "poly_target": 1000,
+          "texture_size": 256
+        }
+      ]
+    },
+    "effects": {
+      "label": "이펙트 오브젝트",
+      "assets": [
+        {
+          "id": "bell_effect",
+          "name": "벨 이펙트",
+          "prompt": "doorbell ring shockwave effect object, expanding neon red concentric rings, electric spark particles radiating outward, transparent energy wave, VFX prop item",
+          "priority": 2,
+          "poly_target": 1000,
+          "texture_size": 256
+        },
+        {
+          "id": "emp_wave",
+          "name": "EMP 파동",
+          "prompt": "electromagnetic pulse wave sphere effect, expanding blue energy sphere with lightning crackling on surface, digital glitch distortion, transparent energy VFX prop",
+          "priority": 3,
+          "poly_target": 1000,
+          "texture_size": 256
+        },
+        {
+          "id": "neon_smoke",
+          "name": "네온 스모크",
+          "prompt": "purple cyberpunk neon smoke cloud effect, swirling violet fog with embedded tiny neon particles, glowing edges, volumetric cloud shape, VFX prop item",
+          "priority": 3,
+          "poly_target": 1000,
+          "texture_size": 256
+        },
+        {
+          "id": "hologram_glitch",
+          "name": "홀로그램 글리치",
+          "prompt": "holographic glitch effect humanoid silhouette, digital distortion bands, cyan and pink chromatic aberration, flickering transparent figure, VFX decoy prop",
+          "priority": 3,
+          "poly_target": 2000,
+          "texture_size": 256
+        },
+        {
+          "id": "dash_trail",
+          "name": "대시 트레일",
+          "prompt": "speed dash afterimage trail effect, elongated purple neon blur streak, motion lines with particle trail, transparent energy ribbon, horizontal VFX prop",
+          "priority": 3,
+          "poly_target": 500,
+          "texture_size": 256
+        },
+        {
+          "id": "alarm_light",
+          "name": "경보 라이트",
+          "prompt": "cyberpunk alarm warning light device, rotating red beacon on dark metal base, emergency strobe with red glow cone, wall-mounted small alarm device, security prop",
+          "priority": 3,
+          "poly_target": 800,
+          "texture_size": 256
+        }
+      ]
+    }
+  }
+}

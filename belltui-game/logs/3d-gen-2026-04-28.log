@@ -1,0 +1,466 @@
+[2026-04-28T09:45:25.056Z] ═══════════════════════════════════════════
+[2026-04-28T09:45:25.062Z] 🎮 벨튀 대작전 — 3D 에셋 AI 생성 시작
+[2026-04-28T09:45:25.063Z]    Provider: meshy
+[2026-04-28T09:45:25.063Z]    Dry Run: true
+[2026-04-28T09:45:25.063Z] ═══════════════════════════════════════════
+[2026-04-28T09:45:25.064Z] 📦 전체 에셋: 40개
+[2026-04-28T09:45:25.064Z] 🎯 대상 에셋: 40개
+[2026-04-28T09:45:25.064Z] 
+📋 [DRY RUN] 프롬프트 목록:
+[2026-04-28T09:45:25.064Z] ────────────────────────────────────────────────────────────
+[2026-04-28T09:45:25.064Z] 
+[character] choroki_idle — 쵸로키 (데스헤머) idle
+[2026-04-28T09:45:25.064Z]   Priority: 1 | Poly: 8000 | Tex: 1024
+[2026-04-28T09:45:25.065Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, chibi girl villain character standing idle pose, black hair with vibrant neon green highlights, green eyes, aviator goggles on head, green and black tactical outfit with glowing circuit patterns, oversized futuristic sledgehammer on her back, neon green accent glow on outfit edges, confident smirk expression, tiny body with big head proportion, full body view
+[2026-04-28T09:45:25.065Z] 
+[character] choroki_hammer — 쵸로키 해머 스윙
+[2026-04-28T09:45:25.065Z]   Priority: 1 | Poly: 10000 | Tex: 1024
+[2026-04-28T09:45:25.065Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, chibi girl villain character in dynamic hammer swing action pose, black hair with green highlights, green tactical outfit, swinging a giant neon green glowing futuristic sledgehammer, motion energy lines, dynamic action pose, full body view
+[2026-04-28T09:45:25.065Z] 
+[architecture] door_closed — 아파트 문 (닫힘)
+[2026-04-28T09:45:25.066Z]   Priority: 1 | Poly: 2000 | Tex: 1024
+[2026-04-28T09:45:25.066Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, cyberpunk apartment door closed state, dark brown metal door with rivets, glowing red doorbell button on right side, electronic lock panel with green LED, door number plate on top, dark industrial style, neon trim frame, single door front view
+[2026-04-28T09:45:25.066Z] 
+[architecture] door_open — 아파트 문 (열림)
+[2026-04-28T09:45:25.066Z]   Priority: 1 | Poly: 2000 | Tex: 1024
+[2026-04-28T09:45:25.066Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, cyberpunk apartment door open state, dark interior visible inside with warm light spilling out, door swung to the left, dark brown metal with electronic lock, neon cyan trim frame, single door front view
+[2026-04-28T09:45:25.066Z] 
+[props] delivery_boxes — 택배 박스 스택
+[2026-04-28T09:45:25.066Z]   Priority: 1 | Poly: 2000 | Tex: 512
+[2026-04-28T09:45:25.066Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, stack of futuristic delivery boxes, 3 cardboard boxes with holographic shipping labels and glowing barcodes, cyberpunk tape and stamps, small potted plant on top, subtle shadow, items on ground
+[2026-04-28T09:45:25.067Z] 
+[props] cctv_camera — CCTV 카메라
+[2026-04-28T09:45:25.067Z]   Priority: 1 | Poly: 1000 | Tex: 256
+[2026-04-28T09:45:25.067Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, cyberpunk security camera mounted on wall bracket, dome shape with blinking red LED indicator light, dark metallic body, visible scan cone hologram below showing detection area, small and detailed
+[2026-04-28T09:45:25.067Z] 
+[props] patrol_drone — 순찰 드론
+[2026-04-28T09:45:25.067Z]   Priority: 1 | Poly: 2000 | Tex: 512
+[2026-04-28T09:45:25.067Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, small cyberpunk surveillance drone, quadcopter design with purple neon glow on rotors, single red scanning eye lens, metallic dark carbon body, hovering pose with subtle thrust glow below, compact design
+[2026-04-28T09:45:25.068Z] 
+[props] doorbell_button — 벨 버튼
+[2026-04-28T09:45:25.068Z]   Priority: 1 | Poly: 500 | Tex: 256
+[2026-04-28T09:45:25.068Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, futuristic cyberpunk doorbell button device, small circular glowing button with pink neon ring, mounted on dark metal plate with circuit patterns, small and detailed prop, wall-mounted
+[2026-04-28T09:45:25.068Z] 
+[equipment] sledgehammer — 슬레지해머
+[2026-04-28T09:45:25.068Z]   Priority: 1 | Poly: 3000 | Tex: 512
+[2026-04-28T09:45:25.068Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, futuristic cyberpunk sledgehammer weapon, oversized hammer head with neon green glowing circuit patterns, dark metal handle with grip tape, energy core visible in hammer head, weapon item floating view
+[2026-04-28T09:45:25.068Z] 
+[character] npc_grandma — 할머니 NPC
+[2026-04-28T09:45:25.069Z]   Priority: 2 | Poly: 5000 | Tex: 512
+[2026-04-28T09:45:25.069Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, elderly grandmother character, hunched posture, holding a futuristic cane with LED trim, wearing a cyberpunk shawl with subtle neon stitching, grumpy expression, brown and warm tones with purple neon accents, full body view
+[2026-04-28T09:45:25.069Z] 
+[character] npc_muscle — 근육맨 NPC
+[2026-04-28T09:45:25.069Z]   Priority: 2 | Poly: 6000 | Tex: 512
+[2026-04-28T09:45:25.069Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, muscular angry man character, tank top, huge arms, one cybernetic arm implant with red glow, furious expression, dark red color scheme with neon red veins on cyber arm, intimidating stance, full body view
+[2026-04-28T09:45:25.069Z] 
+[character] npc_dog_owner — 강아지 + 주인 NPC
+[2026-04-28T09:45:25.070Z]   Priority: 2 | Poly: 8000 | Tex: 512
+[2026-04-28T09:45:25.070Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, casual person with a cyber-enhanced guard dog on a leash, dog has glowing blue eyes and metallic collar with antenna, owner looks annoyed wearing neon-trimmed hoodie, golden and blue tones, full body view
+[2026-04-28T09:45:25.070Z] 
+[character] npc_auntie — 아줌마 NPC
+[2026-04-28T09:45:25.070Z]   Priority: 2 | Poly: 5000 | Tex: 512
+[2026-04-28T09:45:25.070Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, middle-aged Korean woman character, hair towel wrap, apron, holding a megaphone with neon pink glow, shouting expression, magenta and pink color scheme with cyberpunk neon trim, full body view
+[2026-04-28T09:45:25.070Z] 
+[character] npc_guard — 경비원 NPC
+[2026-04-28T09:45:25.070Z]   Priority: 2 | Poly: 6000 | Tex: 512
+[2026-04-28T09:45:25.070Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, cyberpunk security guard character, dark blue uniform with neon blue LED trim, visor helmet with HUD display, holding a walkie-talkie with glowing antenna, stern military posture, navy and cyan tones, full body view
+[2026-04-28T09:45:25.070Z] 
+[character] npc_cat — 고양이 NPC
+[2026-04-28T09:45:25.070Z]   Priority: 2 | Poly: 3000 | Tex: 512
+[2026-04-28T09:45:25.071Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, cute cyberpunk cat sitting, glowing orange eyes, tiny LED collar with antenna, fluffy fur with subtle circuit pattern markings, adorable expression, warm orange and purple tones, small scale character
+[2026-04-28T09:45:25.071Z] 
+[architecture] elevator — 엘리베이터
+[2026-04-28T09:45:25.071Z]   Priority: 2 | Poly: 3000 | Tex: 1024
+[2026-04-28T09:45:25.071Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, cyberpunk elevator double sliding doors, dark metallic with holographic floor display panel, neon cyan LED strip frame, futuristic control panel with glowing buttons, industrial sci-fi style, front view
+[2026-04-28T09:45:25.071Z] 
+[architecture] wall_panel — 복도 벽 패널
+[2026-04-28T09:45:25.071Z]   Priority: 2 | Poly: 500 | Tex: 512
+[2026-04-28T09:45:25.071Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, cyberpunk corridor wall panel tile, dark industrial concrete with embedded neon circuit lines, exposed pipe segment, small ventilation grate, subtle purple glow cracks, tileable modular design
+[2026-04-28T09:45:25.071Z] 
+[props] potted_plant — 화분
+[2026-04-28T09:45:25.071Z]   Priority: 2 | Poly: 1500 | Tex: 512
+[2026-04-28T09:45:25.071Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, cyberpunk potted plant, dark metallic pot with glowing circuit patterns, green bioluminescent leaves with subtle neon vein patterns, small and decorative, purple ambient glow at base
+[2026-04-28T09:45:25.071Z] 
+[props] security_robot — 경비 로봇
+[2026-04-28T09:45:25.071Z]   Priority: 2 | Poly: 6000 | Tex: 512
+[2026-04-28T09:45:25.071Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, cyberpunk security patrol robot, bipedal mechanical design, dark navy body with red warning LED strips, visor head with scanning laser, bulky armored torso, intimidating stance, medium size character
+[2026-04-28T09:45:25.071Z] 
+[props] neon_sign — 네온 사인
+[2026-04-28T09:45:25.071Z]   Priority: 2 | Poly: 800 | Tex: 512
+[2026-04-28T09:45:25.071Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, cyberpunk Korean neon sign, glowing text characters in cyan and pink, mounted on metal bracket, flickering tube light effect, dark background mounting plate, wall-mounted sign
+[2026-04-28T09:45:25.072Z] 
+[equipment] jetpack — 제트팩
+[2026-04-28T09:45:25.072Z]   Priority: 2 | Poly: 3000 | Tex: 512
+[2026-04-28T09:45:25.072Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, compact cyberpunk jetpack equipment, dual thruster nozzles with blue flame glow, dark carbon body with neon green status LEDs, harness straps visible, backpack form factor, equipment item view
+[2026-04-28T09:45:25.072Z] 
+[equipment] hacking_bracelet — 해킹 팔찌
+[2026-04-28T09:45:25.072Z]   Priority: 2 | Poly: 1500 | Tex: 512
+[2026-04-28T09:45:25.072Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, cyberpunk hacking wrist bracelet, holographic display projected above, circuit board patterns, multiple tiny antennas, green LED indicators, dark metal band with flex segments, wearable tech item view
+[2026-04-28T09:45:25.072Z] 
+[good_deeds] stray_cat_bowl — 길고양이 + 밥그릇
+[2026-04-28T09:45:25.072Z]   Priority: 2 | Poly: 3000 | Tex: 512
+[2026-04-28T09:45:25.072Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, thin stray cyberpunk cat sitting next to empty food bowl, big pleading eyes, subtle circuit markings on fur, empty metallic bowl with holographic paw icon, muted orange tones, small scene on ground
+[2026-04-28T09:45:25.072Z] 
+[effects] bell_effect — 벨 이펙트
+[2026-04-28T09:45:25.072Z]   Priority: 2 | Poly: 1000 | Tex: 256
+[2026-04-28T09:45:25.072Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, doorbell ring shockwave effect object, expanding neon red concentric rings, electric spark particles radiating outward, transparent energy wave, VFX prop item
+[2026-04-28T09:45:25.073Z] 
+[character] npc_ghost — 유령 이웃 NPC
+[2026-04-28T09:45:25.073Z]   Priority: 3 | Poly: 4000 | Tex: 512
+[2026-04-28T09:45:25.073Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, ghostly translucent humanoid figure, holographic glitch effect, flickering edges with digital distortion, purple and indigo ethereal glow, no legs fading into mist particles, eerie but stylized appearance, full body view
+[2026-04-28T09:45:25.073Z] 
+[character] npc_pajama — 잠옷 아저씨 NPC
+[2026-04-28T09:45:25.073Z]   Priority: 3 | Poly: 5000 | Tex: 512
+[2026-04-28T09:45:25.073Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, sleepy middle-aged man in cyberpunk pajamas and nightcap with LED dots, holding a slipper as weapon in throwing pose, half-closed eyes yawning, olive green and brown tones with subtle neon, full body view
+[2026-04-28T09:45:25.073Z] 
+[architecture] stairs_section — 계단 섹션
+[2026-04-28T09:45:25.073Z]   Priority: 3 | Poly: 2000 | Tex: 512
+[2026-04-28T09:45:25.073Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, cyberpunk industrial staircase section with 5 steps, metal grating steps with neon purple LED edge strips, dark concrete walls, safety railing with glowing cyan handrail, atmospheric fog, side view
+[2026-04-28T09:45:25.073Z] 
+[architecture] ceiling_light — 천장 형광등
+[2026-04-28T09:45:25.073Z]   Priority: 3 | Poly: 500 | Tex: 256
+[2026-04-28T09:45:25.073Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, cyberpunk industrial ceiling fluorescent light fixture, long rectangular tube light with cool white and blue tint, mounted on dark ceiling bracket, flickering effect design, metal housing with exposed wires
+[2026-04-28T09:45:25.073Z] 
+[props] wall_graffiti — 벽면 낙서 패널
+[2026-04-28T09:45:25.074Z]   Priority: 3 | Poly: 500 | Tex: 512
+[2026-04-28T09:45:25.074Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, cyberpunk wall graffiti panel, spray-painted sledgehammer logo with VILLAIN text in dripping neon red paint, skull crossbones, on concrete wall segment, vandalism street art cyberpunk style, flat panel
+[2026-04-28T09:45:25.074Z] 
+[equipment] optical_camo — 광학미채 장치
+[2026-04-28T09:45:25.074Z]   Priority: 3 | Poly: 2000 | Tex: 512
+[2026-04-28T09:45:25.074Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, cyberpunk optical camouflage belt device, holographic projector modules on a tactical belt, translucent shimmer effect panels, cyan and purple glow elements, high-tech stealth equipment, item view
+[2026-04-28T09:45:25.074Z] 
+[equipment] toy_hammer_launcher — 뿅망치 런처
+[2026-04-28T09:45:25.074Z]   Priority: 3 | Poly: 2500 | Tex: 512
+[2026-04-28T09:45:25.074Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, cyberpunk toy hammer launcher weapon, gun-shaped device that shoots squeaky hammers, colorful neon pink body with yellow accents, magazine of small hammers visible, playful but high-tech design, weapon item view
+[2026-04-28T09:45:25.074Z] 
+[equipment] magnetic_boots — 마그네틱 부츠
+[2026-04-28T09:45:25.074Z]   Priority: 3 | Poly: 2000 | Tex: 512
+[2026-04-28T09:45:25.074Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, cyberpunk magnetic boots pair, heavy-duty boots with electromagnetic sole plates glowing blue, dark metal armor plating, power cables running up the sides, neon blue energy rings at soles, footwear item view
+[2026-04-28T09:45:25.074Z] 
+[good_deeds] delivery_package — 배달 택배
+[2026-04-28T09:45:25.074Z]   Priority: 3 | Poly: 800 | Tex: 256
+[2026-04-28T09:45:25.074Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, single futuristic delivery package on ground, holographic shipping label with blinking DELIVER indicator LED, cardboard with metallic cyberpunk tape, small glowing tracking chip, item on ground
+[2026-04-28T09:45:25.075Z] 
+[good_deeds] broken_light — 고장난 조명
+[2026-04-28T09:45:25.075Z]   Priority: 3 | Poly: 600 | Tex: 256
+[2026-04-28T09:45:25.075Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, broken cyberpunk corridor light fixture, sparking and flickering with exposed wires, intermittent glow with electrical arcs, cracked glass tube, mounted on ceiling bracket, damaged prop
+[2026-04-28T09:45:25.075Z] 
+[good_deeds] street_mic — 거리 공연 마이크
+[2026-04-28T09:45:25.075Z]   Priority: 3 | Poly: 1000 | Tex: 256
+[2026-04-28T09:45:25.075Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, cyberpunk street performance microphone on stand, neon pink glowing mic head, dark metal adjustable stand, small holographic speaker at base, stage performance equipment, standing prop
+[2026-04-28T09:45:25.075Z] 
+[effects] emp_wave — EMP 파동
+[2026-04-28T09:45:25.075Z]   Priority: 3 | Poly: 1000 | Tex: 256
+[2026-04-28T09:45:25.075Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, electromagnetic pulse wave sphere effect, expanding blue energy sphere with lightning crackling on surface, digital glitch distortion, transparent energy VFX prop
+[2026-04-28T09:45:25.075Z] 
+[effects] neon_smoke — 네온 스모크
+[2026-04-28T09:45:25.075Z]   Priority: 3 | Poly: 1000 | Tex: 256
+[2026-04-28T09:45:25.075Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, purple cyberpunk neon smoke cloud effect, swirling violet fog with embedded tiny neon particles, glowing edges, volumetric cloud shape, VFX prop item
+[2026-04-28T09:45:25.076Z] 
+[effects] hologram_glitch — 홀로그램 글리치
+[2026-04-28T09:45:25.076Z]   Priority: 3 | Poly: 2000 | Tex: 256
+[2026-04-28T09:45:25.076Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, holographic glitch effect humanoid silhouette, digital distortion bands, cyan and pink chromatic aberration, flickering transparent figure, VFX decoy prop
+[2026-04-28T09:45:25.076Z] 
+[effects] dash_trail — 대시 트레일
+[2026-04-28T09:45:25.076Z]   Priority: 3 | Poly: 500 | Tex: 256
+[2026-04-28T09:45:25.076Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, speed dash afterimage trail effect, elongated purple neon blur streak, motion lines with particle trail, transparent energy ribbon, horizontal VFX prop
+[2026-04-28T09:45:25.076Z] 
+[effects] alarm_light — 경보 라이트
+[2026-04-28T09:45:25.076Z]   Priority: 3 | Poly: 800 | Tex: 256
+[2026-04-28T09:45:25.076Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, cyberpunk alarm warning light device, rotating red beacon on dark metal base, emergency strobe with red glow cone, wall-mounted small alarm device, security prop
+[2026-04-28T09:45:25.076Z] 
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+[2026-04-28T09:45:25.076Z] ✅ DRY RUN 완료. 총 40개 에셋 확인됨.
+[2026-04-28T09:45:25.077Z] 💰 예상 크레딧: ~600 (Meshy 기준)
+[2026-04-28T12:43:50.084Z] ═══════════════════════════════════════════
+[2026-04-28T12:43:50.094Z] 🎮 벨튀 대작전 — 3D 에셋 AI 생성 시작
+[2026-04-28T12:43:50.094Z]    Provider: meshy
+[2026-04-28T12:43:50.094Z]    Dry Run: true
+[2026-04-28T12:43:50.094Z] ═══════════════════════════════════════════
+[2026-04-28T12:43:50.095Z] 📦 전체 에셋: 40개
+[2026-04-28T12:43:50.095Z] 🎯 대상 에셋: 40개
+[2026-04-28T12:43:50.095Z] 
+📋 [DRY RUN] 프롬프트 목록:
+[2026-04-28T12:43:50.095Z] ────────────────────────────────────────────────────────────
+[2026-04-28T12:43:50.095Z] 
+[character] choroki_idle — 쵸로키 (데스헤머) idle
+[2026-04-28T12:43:50.095Z]   Priority: 1 | Poly: 8000 | Tex: 1024
+[2026-04-28T12:43:50.095Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, chibi girl villain character standing idle pose, black hair with vibrant neon green highlights, green eyes, aviator goggles on head, green and black tactical outfit with glowing circuit patterns, oversized futuristic sledgehammer on her back, neon green accent glow on outfit edges, confident smirk expression, tiny body with big head proportion, full body view
+[2026-04-28T12:43:50.096Z] 
+[character] choroki_hammer — 쵸로키 해머 스윙
+[2026-04-28T12:43:50.096Z]   Priority: 1 | Poly: 10000 | Tex: 1024
+[2026-04-28T12:43:50.096Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, chibi girl villain character in dynamic hammer swing action pose, black hair with green highlights, green tactical outfit, swinging a giant neon green glowing futuristic sledgehammer, motion energy lines, dynamic action pose, full body view
+[2026-04-28T12:43:50.096Z] 
+[architecture] door_closed — 아파트 문 (닫힘)
+[2026-04-28T12:43:50.096Z]   Priority: 1 | Poly: 2000 | Tex: 1024
+[2026-04-28T12:43:50.096Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, cyberpunk apartment door closed state, dark brown metal door with rivets, glowing red doorbell button on right side, electronic lock panel with green LED, door number plate on top, dark industrial style, neon trim frame, single door front view
+[2026-04-28T12:43:50.096Z] 
+[architecture] door_open — 아파트 문 (열림)
+[2026-04-28T12:43:50.096Z]   Priority: 1 | Poly: 2000 | Tex: 1024
+[2026-04-28T12:43:50.096Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, cyberpunk apartment door open state, dark interior visible inside with warm light spilling out, door swung to the left, dark brown metal with electronic lock, neon cyan trim frame, single door front view
+[2026-04-28T12:43:50.096Z] 
+[props] delivery_boxes — 택배 박스 스택
+[2026-04-28T12:43:50.097Z]   Priority: 1 | Poly: 2000 | Tex: 512
+[2026-04-28T12:43:50.097Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, stack of futuristic delivery boxes, 3 cardboard boxes with holographic shipping labels and glowing barcodes, cyberpunk tape and stamps, small potted plant on top, subtle shadow, items on ground
+[2026-04-28T12:43:50.097Z] 
+[props] cctv_camera — CCTV 카메라
+[2026-04-28T12:43:50.097Z]   Priority: 1 | Poly: 1000 | Tex: 256
+[2026-04-28T12:43:50.097Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, cyberpunk security camera mounted on wall bracket, dome shape with blinking red LED indicator light, dark metallic body, visible scan cone hologram below showing detection area, small and detailed
+[2026-04-28T12:43:50.097Z] 
+[props] patrol_drone — 순찰 드론
+[2026-04-28T12:43:50.097Z]   Priority: 1 | Poly: 2000 | Tex: 512
+[2026-04-28T12:43:50.097Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, small cyberpunk surveillance drone, quadcopter design with purple neon glow on rotors, single red scanning eye lens, metallic dark carbon body, hovering pose with subtle thrust glow below, compact design
+[2026-04-28T12:43:50.097Z] 
+[props] doorbell_button — 벨 버튼
+[2026-04-28T12:43:50.097Z]   Priority: 1 | Poly: 500 | Tex: 256
+[2026-04-28T12:43:50.097Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, futuristic cyberpunk doorbell button device, small circular glowing button with pink neon ring, mounted on dark metal plate with circuit patterns, small and detailed prop, wall-mounted
+[2026-04-28T12:43:50.097Z] 
+[equipment] sledgehammer — 슬레지해머
+[2026-04-28T12:43:50.097Z]   Priority: 1 | Poly: 3000 | Tex: 512
+[2026-04-28T12:43:50.097Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, futuristic cyberpunk sledgehammer weapon, oversized hammer head with neon green glowing circuit patterns, dark metal handle with grip tape, energy core visible in hammer head, weapon item floating view
+[2026-04-28T12:43:50.097Z] 
+[character] npc_grandma — 할머니 NPC
+[2026-04-28T12:43:50.098Z]   Priority: 2 | Poly: 5000 | Tex: 512
+[2026-04-28T12:43:50.098Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, elderly grandmother character, hunched posture, holding a futuristic cane with LED trim, wearing a cyberpunk shawl with subtle neon stitching, grumpy expression, brown and warm tones with purple neon accents, full body view
+[2026-04-28T12:43:50.098Z] 
+[character] npc_muscle — 근육맨 NPC
+[2026-04-28T12:43:50.098Z]   Priority: 2 | Poly: 6000 | Tex: 512
+[2026-04-28T12:43:50.098Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, muscular angry man character, tank top, huge arms, one cybernetic arm implant with red glow, furious expression, dark red color scheme with neon red veins on cyber arm, intimidating stance, full body view
+[2026-04-28T12:43:50.098Z] 
+[character] npc_dog_owner — 강아지 + 주인 NPC
+[2026-04-28T12:43:50.098Z]   Priority: 2 | Poly: 8000 | Tex: 512
+[2026-04-28T12:43:50.098Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, casual person with a cyber-enhanced guard dog on a leash, dog has glowing blue eyes and metallic collar with antenna, owner looks annoyed wearing neon-trimmed hoodie, golden and blue tones, full body view
+[2026-04-28T12:43:50.098Z] 
+[character] npc_auntie — 아줌마 NPC
+[2026-04-28T12:43:50.098Z]   Priority: 2 | Poly: 5000 | Tex: 512
+[2026-04-28T12:43:50.098Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, middle-aged Korean woman character, hair towel wrap, apron, holding a megaphone with neon pink glow, shouting expression, magenta and pink color scheme with cyberpunk neon trim, full body view
+[2026-04-28T12:43:50.098Z] 
+[character] npc_guard — 경비원 NPC
+[2026-04-28T12:43:50.098Z]   Priority: 2 | Poly: 6000 | Tex: 512
+[2026-04-28T12:43:50.098Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, cyberpunk security guard character, dark blue uniform with neon blue LED trim, visor helmet with HUD display, holding a walkie-talkie with glowing antenna, stern military posture, navy and cyan tones, full body view
+[2026-04-28T12:43:50.098Z] 
+[character] npc_cat — 고양이 NPC
+[2026-04-28T12:43:50.098Z]   Priority: 2 | Poly: 3000 | Tex: 512
+[2026-04-28T12:43:50.098Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, cute cyberpunk cat sitting, glowing orange eyes, tiny LED collar with antenna, fluffy fur with subtle circuit pattern markings, adorable expression, warm orange and purple tones, small scale character
+[2026-04-28T12:43:50.099Z] 
+[architecture] elevator — 엘리베이터
+[2026-04-28T12:43:50.099Z]   Priority: 2 | Poly: 3000 | Tex: 1024
+[2026-04-28T12:43:50.099Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, cyberpunk elevator double sliding doors, dark metallic with holographic floor display panel, neon cyan LED strip frame, futuristic control panel with glowing buttons, industrial sci-fi style, front view
+[2026-04-28T12:43:50.099Z] 
+[architecture] wall_panel — 복도 벽 패널
+[2026-04-28T12:43:50.099Z]   Priority: 2 | Poly: 500 | Tex: 512
+[2026-04-28T12:43:50.099Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, cyberpunk corridor wall panel tile, dark industrial concrete with embedded neon circuit lines, exposed pipe segment, small ventilation grate, subtle purple glow cracks, tileable modular design
+[2026-04-28T12:43:50.099Z] 
+[props] potted_plant — 화분
+[2026-04-28T12:43:50.099Z]   Priority: 2 | Poly: 1500 | Tex: 512
+[2026-04-28T12:43:50.099Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, cyberpunk potted plant, dark metallic pot with glowing circuit patterns, green bioluminescent leaves with subtle neon vein patterns, small and decorative, purple ambient glow at base
+[2026-04-28T12:43:50.099Z] 
+[props] security_robot — 경비 로봇
+[2026-04-28T12:43:50.099Z]   Priority: 2 | Poly: 6000 | Tex: 512
+[2026-04-28T12:43:50.099Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, cyberpunk security patrol robot, bipedal mechanical design, dark navy body with red warning LED strips, visor head with scanning laser, bulky armored torso, intimidating stance, medium size character
+[2026-04-28T12:43:50.099Z] 
+[props] neon_sign — 네온 사인
+[2026-04-28T12:43:50.100Z]   Priority: 2 | Poly: 800 | Tex: 512
+[2026-04-28T12:43:50.100Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, cyberpunk Korean neon sign, glowing text characters in cyan and pink, mounted on metal bracket, flickering tube light effect, dark background mounting plate, wall-mounted sign
+[2026-04-28T12:43:50.100Z] 
+[equipment] jetpack — 제트팩
+[2026-04-28T12:43:50.100Z]   Priority: 2 | Poly: 3000 | Tex: 512
+[2026-04-28T12:43:50.100Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, compact cyberpunk jetpack equipment, dual thruster nozzles with blue flame glow, dark carbon body with neon green status LEDs, harness straps visible, backpack form factor, equipment item view
+[2026-04-28T12:43:50.100Z] 
+[equipment] hacking_bracelet — 해킹 팔찌
+[2026-04-28T12:43:50.100Z]   Priority: 2 | Poly: 1500 | Tex: 512
+[2026-04-28T12:43:50.100Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, cyberpunk hacking wrist bracelet, holographic display projected above, circuit board patterns, multiple tiny antennas, green LED indicators, dark metal band with flex segments, wearable tech item view
+[2026-04-28T12:43:50.100Z] 
+[good_deeds] stray_cat_bowl — 길고양이 + 밥그릇
+[2026-04-28T12:43:50.100Z]   Priority: 2 | Poly: 3000 | Tex: 512
+[2026-04-28T12:43:50.100Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, thin stray cyberpunk cat sitting next to empty food bowl, big pleading eyes, subtle circuit markings on fur, empty metallic bowl with holographic paw icon, muted orange tones, small scene on ground
+[2026-04-28T12:43:50.100Z] 
+[effects] bell_effect — 벨 이펙트
+[2026-04-28T12:43:50.101Z]   Priority: 2 | Poly: 1000 | Tex: 256
+[2026-04-28T12:43:50.101Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, doorbell ring shockwave effect object, expanding neon red concentric rings, electric spark particles radiating outward, transparent energy wave, VFX prop item
+[2026-04-28T12:43:50.101Z] 
+[character] npc_ghost — 유령 이웃 NPC
+[2026-04-28T12:43:50.101Z]   Priority: 3 | Poly: 4000 | Tex: 512
+[2026-04-28T12:43:50.101Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, ghostly translucent humanoid figure, holographic glitch effect, flickering edges with digital distortion, purple and indigo ethereal glow, no legs fading into mist particles, eerie but stylized appearance, full body view
+[2026-04-28T12:43:50.101Z] 
+[character] npc_pajama — 잠옷 아저씨 NPC
+[2026-04-28T12:43:50.101Z]   Priority: 3 | Poly: 5000 | Tex: 512
+[2026-04-28T12:43:50.101Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, sleepy middle-aged man in cyberpunk pajamas and nightcap with LED dots, holding a slipper as weapon in throwing pose, half-closed eyes yawning, olive green and brown tones with subtle neon, full body view
+[2026-04-28T12:43:50.101Z] 
+[architecture] stairs_section — 계단 섹션
+[2026-04-28T12:43:50.101Z]   Priority: 3 | Poly: 2000 | Tex: 512
+[2026-04-28T12:43:50.101Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, cyberpunk industrial staircase section with 5 steps, metal grating steps with neon purple LED edge strips, dark concrete walls, safety railing with glowing cyan handrail, atmospheric fog, side view
+[2026-04-28T12:43:50.101Z] 
+[architecture] ceiling_light — 천장 형광등
+[2026-04-28T12:43:50.101Z]   Priority: 3 | Poly: 500 | Tex: 256
+[2026-04-28T12:43:50.101Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, cyberpunk industrial ceiling fluorescent light fixture, long rectangular tube light with cool white and blue tint, mounted on dark ceiling bracket, flickering effect design, metal housing with exposed wires
+[2026-04-28T12:43:50.101Z] 
+[props] wall_graffiti — 벽면 낙서 패널
+[2026-04-28T12:43:50.101Z]   Priority: 3 | Poly: 500 | Tex: 512
+[2026-04-28T12:43:50.102Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, cyberpunk wall graffiti panel, spray-painted sledgehammer logo with VILLAIN text in dripping neon red paint, skull crossbones, on concrete wall segment, vandalism street art cyberpunk style, flat panel
+[2026-04-28T12:43:50.102Z] 
+[equipment] optical_camo — 광학미채 장치
+[2026-04-28T12:43:50.102Z]   Priority: 3 | Poly: 2000 | Tex: 512
+[2026-04-28T12:43:50.102Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, cyberpunk optical camouflage belt device, holographic projector modules on a tactical belt, translucent shimmer effect panels, cyan and purple glow elements, high-tech stealth equipment, item view
+[2026-04-28T12:43:50.102Z] 
+[equipment] toy_hammer_launcher — 뿅망치 런처
+[2026-04-28T12:43:50.102Z]   Priority: 3 | Poly: 2500 | Tex: 512
+[2026-04-28T12:43:50.102Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, cyberpunk toy hammer launcher weapon, gun-shaped device that shoots squeaky hammers, colorful neon pink body with yellow accents, magazine of small hammers visible, playful but high-tech design, weapon item view
+[2026-04-28T12:43:50.102Z] 
+[equipment] magnetic_boots — 마그네틱 부츠
+[2026-04-28T12:43:50.102Z]   Priority: 3 | Poly: 2000 | Tex: 512
+[2026-04-28T12:43:50.103Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, cyberpunk magnetic boots pair, heavy-duty boots with electromagnetic sole plates glowing blue, dark metal armor plating, power cables running up the sides, neon blue energy rings at soles, footwear item view
+[2026-04-28T12:43:50.104Z] 
+[good_deeds] delivery_package — 배달 택배
+[2026-04-28T12:43:50.105Z]   Priority: 3 | Poly: 800 | Tex: 256
+[2026-04-28T12:43:50.105Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, single futuristic delivery package on ground, holographic shipping label with blinking DELIVER indicator LED, cardboard with metallic cyberpunk tape, small glowing tracking chip, item on ground
+[2026-04-28T12:43:50.105Z] 
+[good_deeds] broken_light — 고장난 조명
+[2026-04-28T12:43:50.105Z]   Priority: 3 | Poly: 600 | Tex: 256
+[2026-04-28T12:43:50.105Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, broken cyberpunk corridor light fixture, sparking and flickering with exposed wires, intermittent glow with electrical arcs, cracked glass tube, mounted on ceiling bracket, damaged prop
+[2026-04-28T12:43:50.105Z] 
+[good_deeds] street_mic — 거리 공연 마이크
+[2026-04-28T12:43:50.106Z]   Priority: 3 | Poly: 1000 | Tex: 256
+[2026-04-28T12:43:50.106Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, cyberpunk street performance microphone on stand, neon pink glowing mic head, dark metal adjustable stand, small holographic speaker at base, stage performance equipment, standing prop
+[2026-04-28T12:43:50.106Z] 
+[effects] emp_wave — EMP 파동
+[2026-04-28T12:43:50.106Z]   Priority: 3 | Poly: 1000 | Tex: 256
+[2026-04-28T12:43:50.106Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, electromagnetic pulse wave sphere effect, expanding blue energy sphere with lightning crackling on surface, digital glitch distortion, transparent energy VFX prop
+[2026-04-28T12:43:50.106Z] 
+[effects] neon_smoke — 네온 스모크
+[2026-04-28T12:43:50.106Z]   Priority: 3 | Poly: 1000 | Tex: 256
+[2026-04-28T12:43:50.106Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, purple cyberpunk neon smoke cloud effect, swirling violet fog with embedded tiny neon particles, glowing edges, volumetric cloud shape, VFX prop item
+[2026-04-28T12:43:50.106Z] 
+[effects] hologram_glitch — 홀로그램 글리치
+[2026-04-28T12:43:50.106Z]   Priority: 3 | Poly: 2000 | Tex: 256
+[2026-04-28T12:43:50.106Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, holographic glitch effect humanoid silhouette, digital distortion bands, cyan and pink chromatic aberration, flickering transparent figure, VFX decoy prop
+[2026-04-28T12:43:50.106Z] 
+[effects] dash_trail — 대시 트레일
+[2026-04-28T12:43:50.106Z]   Priority: 3 | Poly: 500 | Tex: 256
+[2026-04-28T12:43:50.107Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, speed dash afterimage trail effect, elongated purple neon blur streak, motion lines with particle trail, transparent energy ribbon, horizontal VFX prop
+[2026-04-28T12:43:50.107Z] 
+[effects] alarm_light — 경보 라이트
+[2026-04-28T12:43:50.107Z]   Priority: 3 | Poly: 800 | Tex: 256
+[2026-04-28T12:43:50.107Z]   Prompt: Low-poly stylized cyberpunk 3D model, game-ready topology, PBR textures, neon glow accents, dark purple and cyan color scheme, cyberpunk alarm warning light device, rotating red beacon on dark metal base, emergency strobe with red glow cone, wall-mounted small alarm device, security prop
+[2026-04-28T12:43:50.107Z] 
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+─
+[2026-04-28T12:43:50.107Z] ✅ DRY RUN 완료. 총 40개 에셋 확인됨.
+[2026-04-28T12:43:50.107Z] 💰 예상 크레딧: ~600 (Meshy 기준)

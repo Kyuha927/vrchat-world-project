@@ -1,0 +1,22 @@
+{
+  "version": "1.0",
+  "defaultCharacter": "deathammer",
+  "characters": [
+    {
+      "id": "deathammer",
+      "file": "deathammer.json"
+    },
+    {
+      "id": "phantom",
+      "file": "phantom.json"
+    },
+    {
+      "id": "virus",
+      "file": "virus.json"
+    },
+    {
+      "id": "spark",
+      "file": "spark.json"
+    }
+  ]
+}

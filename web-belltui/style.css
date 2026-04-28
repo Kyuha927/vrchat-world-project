@@ -14,16 +14,24 @@ canvas{display:block}
 .s.good{border-color:rgba(0,212,255,.4)}
 .s.good span{color:var(--neon-blue)}
 
+/* Ability HUD */
+.ability-hud{border-color:rgba(255,209,102,.4);display:flex;align-items:center;gap:6px}
+.ability-hud #ha-key{background:#1a1a2e;color:var(--neon-red);padding:2px 6px;border-radius:4px;font-family:'Press Start 2P',monospace;font-size:9px}
+.ability-hud #ha-name{color:#ddd;font-size:11px}
+.ability-cd-bar{width:60px;height:6px;background:#1a1a2e;border-radius:3px;overflow:hidden}
+.ability-cd-fill{width:100%;height:100%;background:linear-gradient(90deg,var(--neon-red),var(--neon-purple));border-radius:3px;transition:width .1s}
+
 /* Screens */
-#title,#over,#equip{position:absolute;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:auto}
+#title,#over,#equip,#charselect{position:absolute;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:auto}
 #title{background:radial-gradient(ellipse,#1a1a3e,#0a0a1a 70%)}
 #over{background:rgba(10,10,26,.95);display:none}
 #equip{background:rgba(10,10,26,.97);display:none}
+#charselect{background:radial-gradient(ellipse at 50% 40%,#1a1a4a,#0a0a1a 80%);transition:opacity .4s}
 
 h1{font-family:'Press Start 2P',monospace;font-size:28px;color:var(--neon-red);text-shadow:0 0 30px rgba(233,69,96,.5),0 0 60px rgba(233,69,96,.2);margin-bottom:6px;text-align:center;line-height:1.5}
 h2{font-family:'Press Start 2P',monospace;font-size:16px;color:var(--neon-purple);margin-bottom:20px}
 .sub{color:#666;font-size:14px;margin-bottom:24px;text-align:center}
-.btn{background:linear-gradient(135deg,var(--neon-red),#c23152);color:#fff;font-size:16px;font-weight:700;font-family:'Outfit',sans-serif;padding:10px 36px;border:none;border-radius:10px;cursor:pointer;box-shadow:0 4px 16px rgba(233,69,96,.3);margin:4px}
+.btn{background:linear-gradient(135deg,var(--neon-red),#c23152);color:#fff;font-size:16px;font-weight:700;font-family:'Outfit',sans-serif;padding:10px 36px;border:none;border-radius:10px;cursor:pointer;box-shadow:0 4px 16px rgba(233,69,96,.3);margin:4px;transition:transform .15s,box-shadow .15s}
 .btn:hover{transform:scale(1.04);box-shadow:0 6px 24px rgba(233,69,96,.5)}
 .btn.purple{background:linear-gradient(135deg,var(--neon-purple),#7c3aed)}
 .info{color:#444;font-size:11px;margin-top:16px;text-align:center;line-height:1.7}
@@ -37,6 +45,90 @@ h2{font-family:'Press Start 2P',monospace;font-size:16px;color:var(--neon-purple
 .eq-card .icon{font-size:28px}
 .eq-card .name{color:#ddd;font-size:12px;font-weight:700;margin:4px 0 2px}
 .eq-card .desc{color:#666;font-size:10px;line-height:1.3}
+
+/* ========================================
+   CHARACTER SELECT — Cyberpunk Card UI
+   ======================================== */
+
+.char-cards-grid{
+  display:flex;gap:16px;flex-wrap:wrap;justify-content:center;
+  max-width:900px;padding:0 20px;margin-bottom:24px;
+}
+
+.char-card{
+  position:relative;width:195px;
+  background:rgba(15,15,40,.92);
+  border:2px solid #2a2a4a;border-radius:14px;
+  cursor:pointer;overflow:hidden;
+  transform:translateY(30px);opacity:0;
+  transition:all .35s cubic-bezier(.23,1,.32,1);
+}
+.char-card.visible{transform:translateY(0);opacity:1}
+.char-card:hover{
+  border-color:var(--char-color,#E94560);
+  transform:translateY(-6px) scale(1.02);
+  box-shadow:0 8px 32px color-mix(in srgb, var(--char-color,#E94560) 30%, transparent);
+}
+.char-card.selected{
+  border-color:var(--char-color,#E94560);
+  box-shadow:0 0 24px color-mix(in srgb, var(--char-color,#E94560) 40%, transparent),
+    inset 0 0 30px color-mix(in srgb, var(--char-color,#E94560) 8%, transparent);
+}
+
+.char-card-glow{
+  position:absolute;top:-50%;left:-50%;width:200%;height:200%;
+  background:radial-gradient(circle,var(--char-color,#E94560) 0%,transparent 70%);
+  opacity:0;transition:opacity .3s;pointer-events:none;
+}
+.char-card:hover .char-card-glow,.char-card.selected .char-card-glow{opacity:.06}
+
+.char-card-inner{padding:16px 14px 14px}
+
+.char-preview{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:10px;
+}
+.char-emoji{font-size:40px;filter:drop-shadow(0 0 8px var(--char-color,#E94560));animation:float 3s ease-in-out infinite}
+.char-class-badge{
+  background:color-mix(in srgb, var(--char-color,#E94560) 20%, #1a1a2e);
+  color:var(--char-color,#E94560);font-size:10px;font-weight:700;
+  padding:3px 8px;border-radius:6px;
+  border:1px solid color-mix(in srgb, var(--char-color,#E94560) 40%, transparent);
+  letter-spacing:1px;
+}
+
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+
+.char-name{color:#fff;font-size:18px;font-weight:900;letter-spacing:1px}
+.char-name-en{color:#555;font-size:10px;font-weight:400;margin-bottom:6px;text-transform:uppercase;letter-spacing:2px}
+.char-desc{color:#888;font-size:11px;line-height:1.4;margin-bottom:10px;min-height:32px}
+
+/* Stats bars */
+.char-stats{display:flex;flex-direction:column;gap:5px;margin-bottom:10px}
+.stat-row{display:flex;align-items:center;gap:6px}
+.stat-label{color:#666;font-size:9px;width:28px;text-align:right;flex-shrink:0}
+.stat-bar{flex:1;height:5px;background:#1a1a2e;border-radius:3px;overflow:hidden}
+.stat-fill{height:100%;border-radius:3px;transition:width .5s cubic-bezier(.23,1,.32,1)}
+
+/* Ability */
+.char-ability{
+  background:rgba(10,10,30,.8);border-radius:8px;
+  padding:8px 10px;border:1px solid #2a2a4a;
+}
+.ability-key{
+  display:inline-block;
+  background:var(--char-color,#E94560);color:#000;
+  font-family:'Press Start 2P',monospace;font-size:8px;
+  padding:2px 5px;border-radius:3px;margin-right:4px;
+  font-weight:900;
+}
+.ability-name{color:#ddd;font-size:11px;font-weight:700}
+.ability-desc{display:block;color:#666;font-size:9px;margin-top:4px;line-height:1.3}
+
+/* Character select actions */
+.charselect-actions{display:flex;gap:10px;margin-top:8px}
+
+/* ======== */
 
 #fscore{font-family:'Press Start 2P',monospace;font-size:40px;color:var(--neon-red);margin:8px 0}
 #fdetail{color:#888;font-size:14px;margin-bottom:8px}
@@ -57,3 +149,10 @@ h2{font-family:'Press Start 2P',monospace;font-size:16px;color:var(--neon-purple
 
 /* HUD icons */
 .hud-icon{width:18px;height:18px;vertical-align:middle;margin-right:2px;image-rendering:pixelated}
+
+/* Responsive */
+@media (max-width:700px){
+  .char-cards-grid{flex-direction:column;align-items:center}
+  .char-card{width:85%;max-width:260px}
+  h1{font-size:18px}
+}

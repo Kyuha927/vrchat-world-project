@@ -1,0 +1,39 @@
+{
+  "id": "virus",
+  "name": "바이러스",
+  "nameEn": "Virus",
+  "streamer": "",
+  "class": "hacker",
+  "classLabel": "해커",
+  "color": "#00d4ff",
+  "colorSub": "#22d3ee",
+  "emoji": "🦠",
+  "description": "원격 해킹으로 직접 가지 않고 벨튀! 안전하지만 느리다.",
+  "stats": {
+    "speed": 3.2,
+    "dashSpeed": 6.5,
+    "lives": 3,
+    "bellDelay": 1.8,
+    "detectionMod": 1.0
+  },
+  "ability": {
+    "name": "원격 해킹",
+    "nameEn": "Remote Hack",
+    "description": "먼 거리에서 3개 문의 벨을 동시에 울린다!",
+    "key": "Q",
+    "type": "remoteHack",
+    "cooldown": 360,
+    "duration": 1,
+    "targetCount": 3,
+    "range": 400
+  },
+  "sprites": {
+    "idle": "virus_idle",
+    "run": "virus_run",
+    "bell": "virus_bell",
+    "swing": "virus_swing"
+  },
+  "particleColor": "#00d4ff",
+  "dashColor": "#06b6d4",
+  "trailEffect": "data"
+}

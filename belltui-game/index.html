@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🔔 쵸로키의 벨튀 대작전 — 네온시티 2087</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="ui">
+  <div id="loading">
+    <h1>🔨 쵸로키의 벨튀 대작전</h1>
+    <div class="load-wrap"><div id="loadbar" class="load-fill"></div></div>
+    <p id="loadtxt" class="sub">로딩 중... 0%</p>
+  </div>
+  <div id="hud" class="hid">
+    <div class="s"><img src="assets/2d/ui_bell.png" class="hud-icon"> <span id="hs">0</span></div>
+    <div class="s">🔥 <span id="hc">0</span></div>
+    <div class="s"><img src="assets/2d/ui_heart.png" class="hud-icon"> <span id="hl">3</span></div>
+    <div class="s">🏢 <span id="hf">1F</span></div>
+    <div class="s notoriety"><img src="assets/2d/ui_wanted_star.png" class="hud-icon"> 악명 <span id="hn">0</span></div>
+    <div class="s good"><img src="assets/2d/ui_good_halo.png" class="hud-icon"> 선행 <span id="hg">0</span></div>
+  </div>
+  <div id="title" class="hid">
+    <h1>🔨 쵸로키의 벨튀 대작전</h1>
+    <h2>— 네온시티 2087 —</h2>
+    <p class="sub">사이버펑크 도시의 최강 빌런 벨튀 시뮬레이터</p>
+    <button class="btn" onclick="go()">▶ 출격!</button>
+    <div class="info">
+      <kbd>←→</kbd> 이동 <kbd>↑↓</kbd> 층이동 <kbd>Space</kbd> 벨튀<br>
+      <kbd>Shift</kbd> 대시 <kbd>F</kbd> 선행(착한일)
+    </div>
+  </div>
+  <div id="over">
+    <h1>GAME OVER</h1>
+    <div id="fscore">0</div>
+    <div id="fdetail"></div>
+    <div id="fending"></div>
+    <button class="btn" onclick="go()">🔄 다시 도전</button>
+  </div>
+  <div id="alerts"></div>
+</div>
+<script src="sprites.js"></script>
+<script src="game.js"></script>
+</body>
+</html>

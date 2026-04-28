@@ -1,0 +1,38 @@
+{
+  "id": "phantom",
+  "name": "팬텀",
+  "nameEn": "Phantom",
+  "streamer": "",
+  "class": "stealth",
+  "classLabel": "스텔스",
+  "color": "#A855F7",
+  "colorSub": "#c084fc",
+  "emoji": "👻",
+  "description": "투명화로 조용히 벨튀. 연속 콤보의 달인!",
+  "stats": {
+    "speed": 3.8,
+    "dashSpeed": 7.5,
+    "lives": 2,
+    "bellDelay": 1.2,
+    "detectionMod": 0.7
+  },
+  "ability": {
+    "name": "광학미채",
+    "nameEn": "Optical Camouflage",
+    "description": "5초간 투명화! CCTV와 드론에 안 잡힌다.",
+    "key": "Q",
+    "type": "cloak",
+    "cooldown": 300,
+    "duration": 75,
+    "opacity": 0.15
+  },
+  "sprites": {
+    "idle": "phantom_idle",
+    "run": "phantom_run",
+    "bell": "phantom_bell",
+    "swing": "phantom_swing"
+  },
+  "particleColor": "#A855F7",
+  "dashColor": "#7c3aed",
+  "trailEffect": "afterimage"
+}
