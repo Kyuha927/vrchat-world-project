@@ -2,16 +2,16 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
 <title>🚪 벨튀 — 이웃 참여</title>
-<meta name="description" content="벨튀 대작전에 이웃으로 참여하세요! 쵸로키를 잡아라!">
+<meta name="description" content="벨튀 대작전에 이웃으로 참여! 방송을 보고 타이밍을 맞춰 문을 열어라!">
 <link rel="stylesheet" href="fan.css">
 </head>
 <body>
   <div id="app">
-    <!-- JOIN Screen -->
+    <!-- JOIN -->
     <div id="join-screen" class="screen active">
-      <div class="logo">🚪</div>
+      <img src="assets/2d/heojeopguri_fan.png" alt="허접구리" class="logo-img">
       <h1>벨튀 이웃 참여</h1>
       <p class="sub">스트리머의 방 코드를 입력하세요</p>
       <input id="input-code" type="text" maxlength="4" placeholder="ABCD" autocomplete="off" autocapitalize="characters">
@@ -20,67 +20,105 @@
       <p id="join-error" class="error"></p>
     </div>
 
-    <!-- LOBBY Screen -->
+    <!-- LOBBY -->
     <div id="lobby-screen" class="screen">
       <div class="lobby-header">
         <span class="room-label">방 코드</span>
         <span id="lobby-code" class="room-code">----</span>
       </div>
-      <div id="my-neighbor" class="neighbor-card">
+      <div class="neighbor-card">
         <div id="nb-emoji" class="nb-emoji">👵</div>
         <div id="nb-name" class="nb-name">할머니</div>
         <div id="nb-trait" class="nb-trait">느린 추격</div>
       </div>
       <p class="sub">당신은 <strong id="nb-role">이웃</strong>입니다</p>
+      <p class="sub hint">⚠️ 자기 문 위치는 알 수 없습니다!<br>방송을 보고 쵸로키가 내 문 앞에 올 때 문을 여세요.</p>
+      <div id="lobby-reward" class="reward-badge"></div>
       <div id="fan-count" class="fan-count">참가자: 1명</div>
       <button id="btn-ready" class="btn-primary" onclick="toggleReady()">✋ 준비!</button>
-      <p class="sub hint">호스트가 게임을 시작하면 자동으로 시작됩니다</p>
     </div>
 
-    <!-- COUNTDOWN Screen -->
+    <!-- COUNTDOWN -->
     <div id="countdown-screen" class="screen">
       <div class="countdown-num" id="cd-num">3</div>
       <p>곧 시작됩니다!</p>
     </div>
 
-    <!-- GAME Screen -->
+    <!-- GAME -->
     <div id="game-screen" class="screen">
       <div class="game-header">
         <div class="timer" id="game-timer">90</div>
-        <div class="catch-count">🎯 <span id="catch-count">0</span></div>
+        <div class="coin-display">🪙 <span id="coin-count">100</span></div>
+        <div class="stats">
+          <span class="catch-stat">🎯 <span id="catch-count">0</span></span>
+          <span class="miss-stat">❌ <span id="miss-count">0</span></span>
+        </div>
       </div>
 
-      <!-- Door status display -->
-      <div id="door-status" class="door-panel">
-        <div class="door-visual" id="door-visual">
-          <div class="door-frame">
+      <!-- Proximity -->
+      <div class="proximity-bar">
+        <div class="prox-label">발소리 감지</div>
+        <div class="prox-dots">
+          <span class="prox-dot" id="prox-1"></span>
+          <span class="prox-dot" id="prox-2"></span>
+          <span class="prox-dot" id="prox-3"></span>
+        </div>
+        <div class="prox-text" id="prox-text">조용함</div>
+      </div>
+
+      <!-- Door -->
+      <div class="door-panel">
+        <div class="door-visual">
+          <div class="door-frame" id="door-frame">
             <div class="door-surface" id="door-surface">🚪</div>
           </div>
         </div>
-        <div id="door-label" class="door-label">문 닫힘 — 대기 중</div>
+        <div id="door-label" class="door-label">방송을 보고 타이밍을 노리세요!</div>
       </div>
 
-      <!-- Action buttons -->
-      <div id="actions" class="action-area">
-        <div id="action-wait" class="action-group active">
-          <p class="action-hint">🔔 벨이 울리면 반응하세요!</p>
-        </div>
-
-        <div id="action-bell" class="action-group">
-          <p class="action-hint">🔔 쵸로키가 벨을 눌렀다!</p>
-          <button class="btn-action btn-open" onclick="openDoor()">🚪 문 열기!</button>
-          <button class="btn-action btn-ignore" onclick="ignoreBell()">😴 무시</button>
-        </div>
-
-        <div id="action-chase" class="action-group">
-          <p class="action-hint">🏃 추격 방향을 선택하세요!</p>
-          <div class="chase-controls">
-            <button class="btn-chase btn-left" onpointerdown="chaseButton(event,-1)">◀ 왼쪽</button>
-            <button class="btn-chase btn-trap" onclick="placeTrap()" id="btn-trap">🪤 함정</button>
-            <button class="btn-chase btn-right" onpointerdown="chaseButton(event,1)">오른쪽 ▶</button>
+      <!-- Actions -->
+      <div class="action-area">
+        <!-- Bet + Open (default closed state) -->
+        <div id="action-closed" class="action-group active">
+          <div class="bet-area">
+            <span class="bet-label">배팅:</span>
+            <button class="bet-btn selected" data-bet="10" onclick="selectBet(10)">10</button>
+            <button class="bet-btn" data-bet="30" onclick="selectBet(30)">30</button>
+            <button class="bet-btn" data-bet="50" onclick="selectBet(50)">50</button>
+            <button class="bet-btn" data-bet="100" onclick="selectBet(100)">ALL</button>
+            <span class="bet-display" id="bet-display">10</span>
           </div>
-          <button class="btn-small btn-retreat" onclick="retreat()">🏠 집으로 돌아가기</button>
+          <button class="btn-action btn-open-big" id="btn-open" onclick="tryOpenDoor()">
+            🚪 문 열기! (<span id="bet-amount">10</span>코인)
+          </button>
+          <p class="action-hint">맞추면 <strong style="color:#39FF14">3배!</strong> 빗나가면 <strong style="color:#E94560">몰수!</strong></p>
         </div>
+
+        <!-- Cooldown (penalty) -->
+        <div id="action-cooldown" class="action-group">
+          <div class="cooldown-display">
+            <div class="cooldown-icon">⛔</div>
+            <div class="cooldown-timer" id="cooldown-timer">8</div>
+            <div class="cooldown-text">빗나감! 대기 중...</div>
+          </div>
+        </div>
+
+        <!-- Chase (after successful open) -->
+        <div id="action-chase" class="action-group">
+          <p class="action-hint">🎯 성공! 쵸로키를 잡아라!</p>
+          <div class="chase-controls">
+            <button class="btn-chase btn-left" ontouchstart="chase(-1)" onmousedown="chase(-1)">◀ 왼쪽</button>
+            <button class="btn-chase btn-trap" onclick="placeTrap()" id="btn-trap">🪤 함정</button>
+            <button class="btn-chase btn-right" ontouchstart="chase(1)" onmousedown="chase(1)">오른쪽 ▶</button>
+          </div>
+          <button class="btn-small btn-retreat" onclick="retreat()">🏠 집으로</button>
+        </div>
+      </div>
+
+      <!-- Host tracker -->
+      <div class="host-tracker">
+        <span>쵸로키: 💰<span id="host-score">0</span>점</span>
+        <span>❤️<span id="host-lives">3</span></span>
       </div>
 
       <!-- Reactions -->
@@ -93,7 +131,7 @@
       </div>
     </div>
 
-    <!-- RESULT Screen -->
+    <!-- RESULT -->
     <div id="result-screen" class="screen">
       <h1>🏆 게임 종료!</h1>
       <div id="result-host" class="result-card"></div>
@@ -102,7 +140,7 @@
       <button class="btn-primary" onclick="location.reload()">🔄 다시 참여</button>
     </div>
 
-    <!-- Disconnected -->
+    <!-- DC -->
     <div id="dc-screen" class="screen">
       <div class="logo">😢</div>
       <h1>연결 끊김</h1>
@@ -111,9 +149,7 @@
     </div>
   </div>
 
-  <!-- Floating reactions overlay -->
   <div id="reactions-overlay"></div>
-
   <script src="/socket.io/socket.io.js"></script>
   <script src="fan.js"></script>
 </body>

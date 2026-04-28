@@ -49,6 +49,15 @@
       <p class="sub">대기 중인 팬: <strong id="fan-counter">0</strong>명</p>
       <div id="fan-names" style="font-size:13px;color:#aab"></div>
     </div>
+    <div style="margin:12px 0;padding:12px;background:rgba(255,209,102,.04);border:1px solid rgba(255,209,102,.15);border-radius:12px;width:100%">
+      <p style="font-size:13px;color:#ffd166;margin-bottom:8px;font-weight:600">🎁 MVP 보상 (숲)</p>
+      <div style="display:flex;gap:8px;margin-bottom:8px">
+        <button class="btn reward-opt" onclick="setReward('구독권')" id="rw-sub" style="flex:1;padding:8px;border:2px solid rgba(255,255,255,.1);border-radius:8px;background:rgba(255,255,255,.04);color:#ddd;font-family:Outfit;cursor:pointer;font-size:13px">📋 구독권</button>
+        <button class="btn reward-opt" onclick="setReward('퀵뷰')" id="rw-qv" style="flex:1;padding:8px;border:2px solid rgba(255,255,255,.1);border-radius:8px;background:rgba(255,255,255,.04);color:#ddd;font-family:Outfit;cursor:pointer;font-size:13px">⚡ 퀵뷰</button>
+        <button class="btn reward-opt" onclick="setReward('')" id="rw-none" style="flex:1;padding:8px;border:2px solid rgba(255,255,255,.1);border-radius:8px;background:rgba(255,255,255,.04);color:#ddd;font-family:Outfit;cursor:pointer;font-size:13px">없음</button>
+      </div>
+      <input type="text" id="reward-custom" placeholder="직접 입력 (예: 별풍선 1000개)" maxlength="30" style="width:100%;padding:8px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:8px;color:#fff;font-family:Outfit;font-size:13px;outline:none" oninput="setReward(this.value)">
+    </div>
     <button id="btn-host-start" class="btn" onclick="hostStartGame()" disabled>⚡ 게임 시작</button>
     <button class="btn purple" onclick="leaveMulti()">← 뒤로</button>
   </div>

@@ -57,21 +57,11 @@ setInterval(() => {
         // Send full state to host
         io.to(`host_${code}`).emit('state', room.getSnapshot());
 
-        // Send lightweight fan-specific state to each fan
+        // Send lightweight fan-specific state to each fan (NO position info)
         for (const fan of room.fans.values()) {
           if (fan.connected) {
-            io.to(fan.id).emit('fanState', {
-              state: room.state,
-              timeLeft: Math.ceil(room.gameTimer / 20),
-              countdown: Math.ceil(room.countdownTimer / 20),
-              hostState: room.hostState,
-              myDoor: fan.assignedDoor,
-              myDoorState: fan.doorState,
-              trapReady: fan.trapReady,
-              trapCooldown: Math.ceil(fan.trapCooldown / 20),
-              catchCount: fan.catchCount,
-              fanCount: room.fans.size,
-            });
+            const fs = room.getFanState(fan.id);
+            if (fs) io.to(fan.id).emit('fanState', fs);
           }
         }
 
@@ -169,6 +159,14 @@ io.on('connection', (socket) => {
     room.updateHostState(state);
   });
 
+  socket.on('setReward', (reward) => {
+    if (!currentRoom || role !== 'host') return;
+    const room = rooms.get(currentRoom);
+    if (!room) return;
+    room.reward = String(reward || '').substring(0, 30);
+    io.to(currentRoom).emit('lobbyUpdate', { fanCount: room.fans.size, reward: room.reward });
+  });
+
   socket.on('bellRung', (data) => {
     if (!currentRoom || role !== 'host') return;
     const room = rooms.get(currentRoom);
@@ -178,9 +176,8 @@ io.on('connection', (socket) => {
     const doorIdx = Number(data?.doorIdx);
     const evt = room.bellRung(floor, doorIdx);
     if (evt) {
-      // Notify the specific fan that their bell was rung
-      io.to(evt.fanId).emit('bellRung', { floor: evt.floor, doorIdx: evt.doorIdx });
-      // Notify host too
+      // DO NOT notify the fan directly — they must watch the stream!
+      // Only notify host for UI rendering
       socket.emit('gameEvent', evt);
     }
   });
@@ -242,8 +239,22 @@ io.on('connection', (socket) => {
 
     const evt = room.fanAction(socket.id, action);
     if (evt) {
-      // Broadcast event to host and all fans
-      io.to(currentRoom).emit('gameEvent', evt);
+      if (evt.type === 'fanOpenDoor') {
+        // Success: broadcast to host + acting fan
+        if (evt.success) {
+          io.to(`host_${currentRoom}`).emit('gameEvent', evt);
+          socket.emit('gameEvent', { type: 'openSuccess' });
+        } else {
+          // Miss penalty: only tell the fan
+          socket.emit('gameEvent', { type: 'openFail', missCount: evt.missCount, cooldown: evt.cooldown });
+        }
+      } else if (evt.type === 'cooldownActive') {
+        socket.emit('gameEvent', evt);
+      } else {
+        // Chase, trap, retreat etc — broadcast to host
+        io.to(`host_${currentRoom}`).emit('gameEvent', evt);
+        if (evt.type === 'fanReaction') io.to(currentRoom).emit('gameEvent', evt);
+      }
     }
   });
 

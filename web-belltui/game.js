@@ -285,8 +285,18 @@ function updateFanList(snapshot){
     `<span style="color:${f.ready?'#39FF14':'#889'}">${esc(f.neighborType.emoji)}${esc(f.name)}${f.ready?' ✓':''}</span>`
   ).join(' · ');
 }
+let hostReward='';
+function setReward(value){
+  hostReward=String(value||'').substring(0,30);
+  document.querySelectorAll('.reward-opt').forEach(b=>b.style.borderColor='rgba(255,255,255,.1)');
+  if(value==='구독권')document.getElementById('rw-sub').style.borderColor='#ffd166';
+  else if(value==='퀵뷰')document.getElementById('rw-qv').style.borderColor='#ffd166';
+  else if(!value)document.getElementById('rw-none').style.borderColor='#ffd166';
+  if(NET.socket)NET.socket.emit('setReward',hostReward);
+}
 async function hostStartGame(){
   if(!NET.socket)return;
+  if(hostReward)NET.socket.emit('setReward',hostReward);
   const res=await NET.startHostGame();
   if(!res.ok){alert(res.err||'게임을 시작할 수 없습니다');return}
   showCharSelect();
