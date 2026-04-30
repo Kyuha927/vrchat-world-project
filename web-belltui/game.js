@@ -1,6 +1,123 @@
 const cv=document.getElementById('c'),cx=cv.getContext('2d');
 function rs(){cv.width=innerWidth;cv.height=innerHeight} addEventListener('resize',rs);rs();
 const K={};addEventListener('keydown',e=>{K[e.code]=1;e.preventDefault()});addEventListener('keyup',e=>{K[e.code]=0});
+
+// === Mobile Touch Controls ===
+const isMobile = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (innerWidth <= 768);
+let touchPad = null;
+
+function initTouchControls() {
+  if (!isMobile) return;
+  // Prevent zoom/scroll
+  document.body.style.touchAction = 'none';
+  document.body.style.overflow = 'hidden';
+  document.body.style.position = 'fixed';
+  document.body.style.width = '100%';
+  document.body.style.height = '100%';
+
+  const pad = document.createElement('div');
+  pad.id = 'touch-pad';
+  pad.innerHTML = `
+    <div class="tp-left">
+      <button class="tp-btn tp-up" data-key="ArrowUp">▲</button>
+      <div class="tp-mid-row">
+        <button class="tp-btn tp-left-btn" data-key="ArrowLeft">◀</button>
+        <button class="tp-btn tp-down" data-key="ArrowDown">▼</button>
+        <button class="tp-btn tp-right-btn" data-key="ArrowRight">▶</button>
+      </div>
+    </div>
+    <div class="tp-right">
+      <button class="tp-btn tp-bell" data-key="Space">🔔</button>
+      <button class="tp-btn tp-dash" data-key="ShiftLeft">💨</button>
+      <button class="tp-btn tp-good" data-key="KeyF">🤝</button>
+      <button class="tp-btn tp-ability" data-key="KeyQ">⚡</button>
+    </div>
+  `;
+  document.body.appendChild(pad);
+
+  // Style injection
+  const style = document.createElement('style');
+  style.textContent = `
+    #touch-pad {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      display: flex; justify-content: space-between;
+      padding: 12px 16px 20px; z-index: 999;
+      pointer-events: none; user-select: none;
+      -webkit-user-select: none;
+    }
+    #touch-pad > * { pointer-events: all; }
+    .tp-left { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .tp-mid-row { display: flex; gap: 4px; align-items: center; }
+    .tp-right { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; justify-content: flex-end; max-width: 160px; }
+    .tp-btn {
+      width: 56px; height: 56px;
+      border: 2px solid rgba(255,255,255,0.2);
+      border-radius: 14px;
+      background: rgba(10,10,30,0.65);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      color: #fff; font-size: 22px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; touch-action: manipulation;
+      transition: background 0.08s;
+    }
+    .tp-btn:active, .tp-btn.pressed {
+      background: rgba(233,69,96,0.5);
+      border-color: #E94560;
+      transform: scale(0.93);
+    }
+    .tp-bell { width: 68px; height: 68px; font-size: 28px; background: rgba(233,69,96,0.25); border-color: rgba(233,69,96,0.4); }
+    .tp-dash { background: rgba(168,85,247,0.2); border-color: rgba(168,85,247,0.3); }
+    .tp-good { background: rgba(0,212,255,0.15); border-color: rgba(0,212,255,0.3); font-size: 18px; }
+    .tp-ability { background: rgba(255,209,102,0.15); border-color: rgba(255,209,102,0.3); }
+    @media (min-width: 769px) { #touch-pad { display: none !important; } }
+    /* Hide keyboard hint on mobile */
+    @media (max-width: 768px) {
+      .info { display: none !important; }
+      #hud { font-size: 12px !important; flex-wrap: wrap; gap: 4px !important; }
+      #hud .s { padding: 3px 6px !important; font-size: 11px !important; }
+      #title h1 { font-size: 28px !important; }
+      #title h2 { font-size: 14px !important; }
+      .btn { padding: 14px 24px !important; font-size: 15px !important; }
+      .char-cards-grid { grid-template-columns: 1fr 1fr !important; gap: 8px !important; }
+      #charselect { padding: 12px !important; }
+    }
+  `;
+  document.head.appendChild(style);
+
+  // Touch handlers — map to keyboard state
+  pad.querySelectorAll('.tp-btn').forEach(btn => {
+    const key = btn.dataset.key;
+    btn.addEventListener('touchstart', (e) => {
+      e.preventDefault(); e.stopPropagation();
+      K[key] = 1;
+      btn.classList.add('pressed');
+      // Init audio context on first touch
+      if (!ac) ia();
+    }, { passive: false });
+    btn.addEventListener('touchend', (e) => {
+      e.preventDefault(); e.stopPropagation();
+      K[key] = 0;
+      btn.classList.remove('pressed');
+    }, { passive: false });
+    btn.addEventListener('touchcancel', (e) => {
+      K[key] = 0;
+      btn.classList.remove('pressed');
+    });
+    // Mouse fallback for testing
+    btn.addEventListener('mousedown', (e) => { K[key] = 1; btn.classList.add('pressed'); if (!ac) ia(); });
+    btn.addEventListener('mouseup', (e) => { K[key] = 0; btn.classList.remove('pressed'); });
+    btn.addEventListener('mouseleave', (e) => { K[key] = 0; btn.classList.remove('pressed'); });
+  });
+
+  touchPad = pad;
+}
+// Init touch controls after DOM
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initTouchControls);
+} else {
+  initTouchControls();
+}
 let ac,amb;
 function ia(){const AC=window.AudioContext||window.webkitAudioContext;ac=new AC()}
 function snd(f,d,t='square',v=.06,when=0){if(!ac)return;const now=ac.currentTime+when,o=ac.createOscillator(),g=ac.createGain();o.type=t;o.frequency.value=f;g.gain.setValueAtTime(v,now);g.gain.exponentialRampToValueAtTime(.001,now+d);o.connect(g);g.connect(ac.destination);o.start(now);o.stop(now+d)}
@@ -18,6 +135,16 @@ const NB=[
 {name:'고양이집',em:'🐱',col:'#FF8C00',spd:1,rng:120,del:100,angEm:'😾',trait:'stun'},
 {name:'잠옷아저씨',em:'😴',col:'#556B2F',spd:1.5,rng:150,del:140,angEm:'🩴',trait:'throw'},
 ];
+// Floor-specific neighbor pools — thematic placement
+const FLOOR_NB_POOLS=[
+  [6,3,0,7],   // B1: 고양이집, 유령, 할머니, 잠옷아저씨 (느린/은밀)
+  [0,7,4,6],   // 1F: 할머니, 잠옷아저씨, 아줌마, 고양이집 (서민)
+  [0,4,7,2],   // 2F: 할머니, 아줌마, 잠옷아저씨, 강아지집
+  [1,4,2,5],   // 3F: 근육맨, 아줌마, 강아지집, 경비원 (공격적)
+  [1,5,2,4],   // 4F: 근육맨, 경비원, 강아지집, 아줌마
+  [1,5,1,5],   // 5F: 근육맨, 경비원 위주 (최고 난이도)
+];
+function pickNB(floor){const pool=FLOOR_NB_POOLS[floor];return{...NB[pool[Math.floor(Math.random()*pool.length)]]}}
 const GOOD_DEEDS=[
 {em:'🐱',name:'길고양이 밥주기',desc:'고양이에게 밥을 줬다!',reduce:1},
 {em:'📦',name:'택배 배달',desc:'택배를 문 앞에 놓아줬다!',reduce:1},
@@ -36,27 +163,33 @@ const NEON_SIGNS=[
 {txt:'PC방',col:'#00d4ff',w:58},{txt:'치킨',col:'#ffd166',w:56},{txt:'빌런조합',col:'#E94560',w:92},
 {txt:'24시 라면',col:'#7FFF7F',w:86},{txt:'사이버분식',col:'#A855F7',w:96},{txt:'고양이카페',col:'#ff8c00',w:96}
 ];
+const WORLD_W=1200; // Fixed virtual world width for consistent balance
+const GAME_TIME=90; // 90-second time limit
 
 let G=null;
 class Game{
 constructor(){
 this.score=0;this.combo=0;this.maxC=0;this.lives=3;this.fl=0;this.t=0;
 this.state='play';this.cT=0;this.shake=0;this.notoriety=0;this.goodCount=0;
+this.timer=GAME_TIME*20; // 90 seconds at ~20fps (ticked every update)
 this.p={x:100,y:0,vx:0,sp:4.5,dsp:9,dash:0,face:1,af:0,ring:0,stunT:0};
 this.floors=[];this.parts=[];this.cam=0;this.alerts=[];this.goodEvts=[];this.popups=[];
 this.invuln=0;this.freeze=null;this.transition=null;
 this.rain=Array.from({length:120},()=>({x:Math.random()*cv.width,y:Math.random()*cv.height,l:8+Math.random()*18,spd:6+Math.random()*8,a:.18+Math.random()*.22}));
 for(let f=0;f<6;f++){
-  const nd=5+f,sp=Math.max(130,(cv.width-160)/nd),doors=[];
+  const nd=5+f,sp=(WORLD_W-160)/nd,doors=[];
   for(let d=0;d<nd;d++){
-    const nb={...NB[Math.floor(Math.random()*NB.length)]};
+    const nb=pickNB(f);
     doors.push({x:100+d*sp,st:'closed',tm:0,sc:false,nb,nx:0,
       del:Math.max(25,nb.del-f*10),cSpd:nb.spd+f*.2,det:nb.rng+f*8});
   }
-  const hs=[];for(let i=1;i<nd;i+=2)hs.push({x:100+i*sp-sp/2,w:36});hs.push({x:30,w:36});
-  // Good deed events
-  const ge=[];if(Math.random()>.4){const gd=GOOD_DEEDS[Math.floor(Math.random()*GOOD_DEEDS.length)];
-    ge.push({...gd,x:100+Math.floor(Math.random()*nd)*sp+sp/2,done:false});}
+  // Hide spots — randomized positions with floor variation
+  const hs=[];const hsCount=Math.max(2,Math.floor(nd/2))+Math.floor(Math.random()*2);
+  for(let i=0;i<hsCount;i++){const hx=80+Math.random()*(nd*sp-40);hs.push({x:hx,w:32+Math.random()*8})}
+  // Good deed events — more on lower floors, fewer on higher
+  const maxGood=f<=1?2:f<=3?1:Math.random()>.6?1:0;
+  const ge=[];for(let gi=0;gi<maxGood;gi++){if(Math.random()>.3){const gd=GOOD_DEEDS[Math.floor(Math.random()*GOOD_DEEDS.length)];
+    ge.push({...gd,x:100+Math.floor(Math.random()*nd)*sp+sp/2+Math.random()*40-20,done:false})}}
   const signs=[];for(let s=0;s<3;s++){const sg=NEON_SIGNS[(f+s*2+Math.floor(Math.random()*NEON_SIGNS.length))%NEON_SIGNS.length];
     signs.push({...sg,x:80+s*260+Math.random()*80,y:-96-Math.random()*28,phase:Math.random()*10});}
   this.floors.push({doors,hs,ge,drones:[],signs});
@@ -68,7 +201,8 @@ this.upY();
 }
 fy(f){return cv.height-70-f*110}
 upY(){this.p.y=this.fy(this.fl)}
-fw(){const d=this.floors[this.fl].doors;return d.length?d[d.length-1].x+130:cv.width}
+fw(){return WORLD_W}
+timerSec(){return Math.max(0,Math.ceil(this.timer/20))}
 notorietyLevel(){return Math.min(4,Math.floor(this.notoriety/6))}
 tickFx(){
 this.rain.forEach(r=>{r.x-=2.4;r.y+=r.spd;if(r.y>cv.height+30||r.x<-30){r.x=Math.random()*cv.width+40;r.y=-30;r.spd=6+Math.random()*8}});
@@ -82,6 +216,9 @@ goodFreeze(ge){this.freeze={t:42,em:ge.em,title:ge.name,desc:ge.desc};this.shake
 
 update(){
 if(this.state==='over')return;
+// Timer countdown
+this.timer--;
+if(this.timer<=0){this.state='over';this.showOver();return}
 this.tickFx();
 if(this.freeze){this.freeze.t--;this.t++;if(this.freeze.t<=0)this.freeze=null;this.upHUD();return}
 if(this.state==='caught'){this.cT--;this.shake=this.cT*.3;if(this.cT<=0){this.lives--;
@@ -161,8 +298,6 @@ this.rain.forEach(r=>{cx.globalAlpha=r.a;cx.beginPath();cx.moveTo(r.x,r.y);cx.li
 const cm=Math.max(0,this.cam);cx.save();cx.translate(-cm,0);
 for(let f=0;f<6;f++){
   const fy=this.fy(f),fl=this.floors[f],ft=FLOOR_THEMES[f];
-  // Floor line with neon
-  cx.fillStyle=f===this.fl?'#1e1e50':'#14142e';cx.fillRect(0,fy+48,this.fw()+160,3);
   if(f===this.fl){cx.fillStyle='rgba(233,69,96,.15)';cx.fillRect(0,fy+48,this.fw()+160,2)}
   // Floor label
   cx.fillStyle='#335';cx.font='11px Outfit';cx.fillText(ft.name,6,fy+16);
@@ -233,12 +368,16 @@ cx.globalAlpha=1;cx.font='12px Outfit';cx.fillText(d.st==='angry'?nb.angEm:'❓'
 
 upHUD(){document.getElementById('hs').textContent=this.score;document.getElementById('hc').textContent=this.combo;
 document.getElementById('hl').textContent=this.lives;document.getElementById('hf').textContent=FLOOR_THEMES[this.fl].name;
-document.getElementById('hn').textContent=this.notoriety;document.getElementById('hg').textContent=this.goodCount}
+document.getElementById('hn').textContent=this.notoriety;document.getElementById('hg').textContent=this.goodCount;
+const te=document.getElementById('ht');if(te){const s=this.timerSec();te.textContent=s;te.style.color=s<=15?'#E94560':s<=30?'#ffd166':'#aab';
+te.parentElement.classList.toggle('urgent',s<=15)}}
 showOver(){const nl=this.notorietyLevel();
 const endings=['"또 왔네 저 애" — 동네 허당 빌런','"또 왔네 저 애" — 동네 허당 빌런','지명수배... 하지만 미움받진 않았다','도시가 당신을 두려워한다','공공의 적 1호. 쓸쓸한 빌런의 최후'];
 document.getElementById('fscore').textContent=this.score;
-document.getElementById('fdetail').textContent=`콤보 ${this.maxC} | 선행 ${this.goodCount}회`;
-document.getElementById('fending').textContent=this.goodCount>=5&&nl<=1?'🌟 선행 엔딩: 빌런인 줄 알았더니 동네 히어로!':endings[nl];
+const timeLeft=this.timerSec();
+document.getElementById('fdetail').textContent=`콤보 ${this.maxC} | 선행 ${this.goodCount}회 | 남은시간 ${timeLeft}초`;
+const timeBonus=timeLeft>0?'(시간 초과!)':'';
+document.getElementById('fending').textContent=this.goodCount>=5&&nl<=1?'🌟 선행 엔딩: 빌런인 줄 알았더니 동네 히어로!':(endings[nl]+' '+timeBonus).trim();
 document.getElementById('over').style.display='flex';document.getElementById('hud').classList.add('hid')}
 }
 let isMulti=false;
