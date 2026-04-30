@@ -27,7 +27,7 @@ body{background:var(--bg);color:#fff;overflow:hidden;touch-action:none}
 #title{background:radial-gradient(ellipse,#1a1a3e,#0a0a1a 70%)}
 #over{background:rgba(10,10,26,.95);display:none}
 #equip{background:rgba(10,10,26,.97);display:none}
-#charselect{background:radial-gradient(ellipse at 50% 40%,#1a1a4a,#0a0a1a 80%);transition:opacity .4s}
+#charselect{background:radial-gradient(ellipse at 50% 40%,#1a1a4a,#0a0a1a 80%);transition:opacity .4s;overflow-y:auto;justify-content:flex-start;padding:24px 12px 120px}
 
 h1{font-family:'Press Start 2P',monospace;font-size:28px;color:var(--neon-red);text-shadow:0 0 30px rgba(233,69,96,.5),0 0 60px rgba(233,69,96,.2);margin-bottom:6px;text-align:center;line-height:1.5}
 h2{font-family:'Press Start 2P',monospace;font-size:16px;color:var(--neon-purple);margin-bottom:20px}
@@ -127,7 +127,8 @@ h2{font-family:'Press Start 2P',monospace;font-size:16px;color:var(--neon-purple
 .ability-desc{display:block;color:#666;font-size:9px;margin-top:4px;line-height:1.3}
 
 /* Character select actions */
-.charselect-actions{display:flex;gap:10px;margin-top:8px}
+.charselect-actions{display:flex;gap:10px;margin:8px 0 16px;order:1;z-index:35}
+.char-cards-grid{order:2}
 
 /* ======== */
 

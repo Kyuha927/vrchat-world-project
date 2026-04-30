@@ -40,11 +40,12 @@ function initTouchControls() {
   style.textContent = `
     #touch-pad {
       position: fixed; bottom: 0; left: 0; right: 0;
-      display: flex; justify-content: space-between;
+      display: none; justify-content: space-between;
       padding: 12px 16px 20px; z-index: 999;
       pointer-events: none; user-select: none;
       -webkit-user-select: none;
     }
+    body.game-active #touch-pad { display: flex; }
     #touch-pad > * { pointer-events: all; }
     .tp-left { display: flex; flex-direction: column; align-items: center; gap: 4px; }
     .tp-mid-row { display: flex; gap: 4px; align-items: center; }
@@ -171,7 +172,7 @@ class Game{
 constructor(){
 this.score=0;this.combo=0;this.maxC=0;this.lives=3;this.fl=0;this.t=0;
 this.state='play';this.cT=0;this.shake=0;this.notoriety=0;this.goodCount=0;
-this.timer=GAME_TIME*20; // 90 seconds at ~20fps (ticked every update)
+this.timer=GAME_TIME;this.lastTimerAt=performance.now(); // 90 real seconds
 this.p={x:100,y:0,vx:0,sp:4.5,dsp:9,dash:0,face:1,af:0,ring:0,stunT:0};
 this.floors=[];this.parts=[];this.cam=0;this.alerts=[];this.goodEvts=[];this.popups=[];
 this.invuln=0;this.freeze=null;this.transition=null;
@@ -202,7 +203,7 @@ this.upY();
 fy(f){return cv.height-70-f*110}
 upY(){this.p.y=this.fy(this.fl)}
 fw(){return WORLD_W}
-timerSec(){return Math.max(0,Math.ceil(this.timer/20))}
+timerSec(){return Math.max(0,Math.ceil(this.timer))}
 notorietyLevel(){return Math.min(4,Math.floor(this.notoriety/6))}
 tickFx(){
 this.rain.forEach(r=>{r.x-=2.4;r.y+=r.spd;if(r.y>cv.height+30||r.x<-30){r.x=Math.random()*cv.width+40;r.y=-30;r.spd=6+Math.random()*8}});
@@ -216,8 +217,9 @@ goodFreeze(ge){this.freeze={t:42,em:ge.em,title:ge.name,desc:ge.desc};this.shake
 
 update(){
 if(this.state==='over')return;
-// Timer countdown
-this.timer--;
+// Timer countdown based on real elapsed time, not frame count.
+const now=performance.now(),dt=Math.min(.25,(now-this.lastTimerAt)/1000);this.lastTimerAt=now;
+this.timer-=dt;
 if(this.timer<=0){this.state='over';this.showOver();return}
 this.tickFx();
 if(this.freeze){this.freeze.t--;this.t++;if(this.freeze.t<=0)this.freeze=null;this.upHUD();return}
@@ -378,10 +380,10 @@ const timeLeft=this.timerSec();
 document.getElementById('fdetail').textContent=`콤보 ${this.maxC} | 선행 ${this.goodCount}회 | 남은시간 ${timeLeft}초`;
 const timeBonus=timeLeft>0?'(시간 초과!)':'';
 document.getElementById('fending').textContent=this.goodCount>=5&&nl<=1?'🌟 선행 엔딩: 빌런인 줄 알았더니 동네 히어로!':(endings[nl]+' '+timeBonus).trim();
-document.getElementById('over').style.display='flex';document.getElementById('hud').classList.add('hid')}
+document.body.classList.remove('game-active');document.getElementById('over').style.display='flex';document.getElementById('hud').classList.add('hid')}
 }
 let isMulti=false;
-function go(){if(!ac)ia();startAmb();document.getElementById('title').classList.add('hid');
+function go(){if(!ac)ia();startAmb();document.body.classList.add('game-active');document.getElementById('title').classList.add('hid');
 document.getElementById('multi-lobby').style.display='none';document.getElementById('multi-lobby').classList.add('hid');
 document.getElementById('over').style.display='none';
 document.getElementById('hud').classList.remove('hid');G=new Game();G.upHUD();

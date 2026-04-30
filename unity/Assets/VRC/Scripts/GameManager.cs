@@ -4,73 +4,71 @@ using VRC.SDKBase;
 using VRC.Udon;
 
 /// <summary>
-/// 벨튀 대작전 — 전체 게임 상태를 관리하는 싱글톤 매니저.
-/// 점수, 콤보, 악명, 선행, 라운드 타이머를 네트워크 동기화합니다.
+/// Network-synced game state for BellTui.
+/// Mirrors the web version rules: six floors, a 90-second round, combo scoring,
+/// notoriety levels, and floor-based difficulty scaling.
 /// </summary>
 [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
 public class GameManager : UdonSharpBehaviour
 {
-    [Header("=== 게임 설정 ===")]
-    public float roundDuration = 180f; // 3분 라운드
+    [Header("=== Game Settings ===")]
+    public float roundDuration = 90f; // Match the web version 90-second round.
     public int maxNotoriety = 30;
 
-    [Header("=== UI 참조 ===")]
+    [Header("=== Floor Difficulty ===")]
+    [UdonSynced] public int currentFloor = 0;
+    public int maxFloor = 5;
+    public float[] floorDifficultyMultipliers = new float[] { 1f, 1.12f, 1.25f, 1.4f, 1.6f, 1.85f };
+    public int[] floorBellScoreBase = new int[] { 100, 120, 140, 160, 180, 220 };
+
+    [Header("=== UI References ===")]
     public ScoreBoard scoreBoard;
     public NotorietySystem notorietySystem;
 
-    [Header("=== 사운드 ===")]
+    [Header("=== Audio ===")]
     public AudioSource bgmSource;
     public AudioClip bgmClip;
     public AudioClip gameStartClip;
     public AudioClip gameOverClip;
 
-    // --- 동기화 변수 ---
     [UdonSynced] private bool _gameActive = false;
-    [UdonSynced] private float _timeRemaining = 180f;
+    [UdonSynced] private float _timeRemaining = 90f;
 
-    // 로컬 플레이어 스탯 (각 플레이어 독립)
     private int _localScore = 0;
     private int _localCombo = 0;
     private int _localMaxCombo = 0;
     private int _localBellCount = 0;
     private int _localGoodDeeds = 0;
 
-    // 상태
-    private bool _isOwnerTicking = false;
-
-    // === 프로퍼티 ===
     public bool IsGameActive => _gameActive;
     public float TimeRemaining => _timeRemaining;
     public int LocalScore => _localScore;
     public int LocalCombo => _localCombo;
+    public int CurrentFloor => currentFloor;
 
-    // === 게임 시작 ===
     public void StartGame()
     {
-        if (!Networking.IsOwner(gameObject))
-        {
-            Networking.SetOwner(Networking.LocalPlayer, gameObject);
-        }
+        BecomeOwner();
 
         _gameActive = true;
         _timeRemaining = roundDuration;
-        RequestSerialization();
+        currentFloor = 0;
 
-        // 로컬 초기화
         _localScore = 0;
         _localCombo = 0;
         _localMaxCombo = 0;
         _localBellCount = 0;
         _localGoodDeeds = 0;
 
+        if (notorietySystem != null) notorietySystem.ResetNotoriety();
         if (scoreBoard != null) scoreBoard.ResetScores();
 
+        RequestSerialization();
         SendCustomNetworkEvent(VRC.Udon.Common.Interfaces.NetworkEventTarget.All, nameof(OnGameStarted));
     }
 
     public void OnGameStarted()
     {
-        // 각 클라이언트에서 실행
         if (bgmSource != null && bgmClip != null)
         {
             bgmSource.clip = bgmClip;
@@ -82,10 +80,9 @@ public class GameManager : UdonSharpBehaviour
             AudioSource.PlayClipAtPoint(gameStartClip, transform.position);
         }
 
-        Debug.Log("[BellTui] 게임 시작!");
+        Debug.Log("[BellTui] Game started.");
     }
 
-    // === 게임 종료 ===
     public void EndGame()
     {
         if (!Networking.IsOwner(gameObject)) return;
@@ -105,16 +102,14 @@ public class GameManager : UdonSharpBehaviour
             AudioSource.PlayClipAtPoint(gameOverClip, transform.position);
         }
 
-        // 스코어보드에 최종 결과 표시
         if (scoreBoard != null)
         {
             scoreBoard.ShowFinalResult(_localScore, _localMaxCombo, _localBellCount, _localGoodDeeds);
         }
 
-        Debug.Log($"[BellTui] 게임 종료! 점수:{_localScore} 최고콤보:{_localMaxCombo}");
+        Debug.Log($"[BellTui] Game ended. Score:{_localScore} MaxCombo:{_localMaxCombo}");
     }
 
-    // === 점수 추가 (벨튀 성공 시 호출) ===
     public void AddBellScore()
     {
         if (!_gameActive) return;
@@ -123,31 +118,27 @@ public class GameManager : UdonSharpBehaviour
         _localCombo++;
         if (_localCombo > _localMaxCombo) _localMaxCombo = _localCombo;
 
-        int points = 100 * _localCombo;
+        int points = GetCurrentFloorBaseScore() * _localCombo;
         _localScore += points;
 
-        // 악명 증가
         if (notorietySystem != null)
         {
             notorietySystem.AddNotoriety(1);
         }
 
-        // UI 업데이트
         if (scoreBoard != null)
         {
             scoreBoard.UpdateLocalScore(_localScore, _localCombo, _localBellCount);
         }
 
-        Debug.Log($"[BellTui] 벨튀! +{points} (콤보 x{_localCombo})");
+        Debug.Log($"[BellTui] Bell score +{points} (combo x{_localCombo}, floor {currentFloor + 1})");
     }
 
-    // === 콤보 리셋 (잡혔을 때) ===
     public void ResetCombo()
     {
         _localCombo = 0;
     }
 
-    // === 선행 추가 ===
     public void AddGoodDeed(int notorietyReduction)
     {
         if (!_gameActive) return;
@@ -164,10 +155,54 @@ public class GameManager : UdonSharpBehaviour
             scoreBoard.UpdateGoodDeeds(_localGoodDeeds);
         }
 
-        Debug.Log($"[BellTui] 선행! 악명 -{notorietyReduction}");
+        Debug.Log($"[BellTui] Good deed. Notoriety -{notorietyReduction}");
     }
 
-    // === 타이머 (오너만 틱) ===
+    public void SetCurrentFloor(int floor)
+    {
+        BecomeOwner();
+        currentFloor = Mathf.Clamp(floor, 0, maxFloor);
+        RequestSerialization();
+    }
+
+    public float GetCurrentFloorDifficulty()
+    {
+        return GetFloorDifficulty(currentFloor);
+    }
+
+    public float GetFloorDifficulty(int floor)
+    {
+        int safeFloor = Mathf.Clamp(floor, 0, maxFloor);
+        if (floorDifficultyMultipliers == null || floorDifficultyMultipliers.Length == 0)
+        {
+            return 1f;
+        }
+
+        int index = Mathf.Min(safeFloor, floorDifficultyMultipliers.Length - 1);
+        return Mathf.Max(1f, floorDifficultyMultipliers[index]);
+    }
+
+    public int GetCurrentFloorBaseScore()
+    {
+        if (floorBellScoreBase == null || floorBellScoreBase.Length == 0)
+        {
+            return 100;
+        }
+
+        int index = Mathf.Min(Mathf.Clamp(currentFloor, 0, maxFloor), floorBellScoreBase.Length - 1);
+        return Mathf.Max(100, floorBellScoreBase[index]);
+    }
+
+    public int GetCurrentNotorietyLevel()
+    {
+        if (notorietySystem != null)
+        {
+            return notorietySystem.NotorietyLevel;
+        }
+
+        return 0;
+    }
+
     private void Update()
     {
         if (!_gameActive) return;
@@ -182,17 +217,23 @@ public class GameManager : UdonSharpBehaviour
                 return;
             }
 
-            // 10초마다 동기화 (부하 최소화)
             if (Time.frameCount % 600 == 0)
             {
                 RequestSerialization();
             }
         }
 
-        // UI 타이머 업데이트
         if (scoreBoard != null)
         {
             scoreBoard.UpdateTimer(_timeRemaining);
+        }
+    }
+
+    private void BecomeOwner()
+    {
+        if (Networking.LocalPlayer != null && !Networking.IsOwner(gameObject))
+        {
+            Networking.SetOwner(Networking.LocalPlayer, gameObject);
         }
     }
 }

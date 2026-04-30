@@ -4,44 +4,48 @@ using VRC.SDKBase;
 using VRC.Udon;
 
 /// <summary>
-/// 벨튀 대작전 — 문 컨트롤러.
-/// 벨이 울리면 열리고, 일정 시간 후 주민(NPC)이 반응합니다.
-/// 주민이 플레이어를 감지하면 잡힘 처리.
+/// Door/NPC controller for BellTui.
+/// The door reacts faster and stays risky for less time on harder floors,
+/// matching the web version's floor-based difficulty curve.
 /// </summary>
 [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
 public class DoorController : UdonSharpBehaviour
 {
-    [Header("=== 연결 ===")]
+    [Header("=== References ===")]
     public GameManager gameManager;
-    public Transform doorPivot; // 문 회전축
-    public Transform npcSpawnPoint; // 주민이 나타나는 위치
+    public Transform doorPivot;
+    public Transform npcSpawnPoint;
 
-    [Header("=== 주민 설정 ===")]
-    [Tooltip("주민 타입: slow, fast, ghost, alarm, alert, stun, throw")]
+    [Header("=== Neighbor Settings ===")]
+    [Tooltip("Neighbor type: slow, fast, ghost, alarm, alert, stun, throw")]
     public string neighborType = "slow";
-    public float reactionDelay = 2f; // 벨 후 문 열리기까지 시간
-    public float detectionRange = 5f; // 주민 감지 거리
-    public float openDuration = 4f; // 문이 열려있는 시간
-    public float neighborSpeed = 1.5f; // 주민 추적 속도
+    public int floorIndex = 0;
+    public float baseReactionDelay = 2f;
+    public float reactionDelay = 2f;
+    public float baseDetectionRange = 5f;
+    public float detectionRange = 5f;
+    public float baseOpenDuration = 4f;
+    public float openDuration = 4f;
+    public float baseNeighborSpeed = 1.5f;
+    public float neighborSpeed = 1.5f;
+    public float difficultyMultiplier = 1f;
 
-    [Header("=== 사운드 ===")]
+    [Header("=== Audio ===")]
     public AudioSource doorAudio;
     public AudioClip doorOpenClip;
     public AudioClip neighborAngryClip;
 
-    [Header("=== 비주얼 ===")]
-    public GameObject npcVisual; // 주민 비주얼 오브젝트
+    [Header("=== Visuals ===")]
+    public GameObject npcVisual;
     public Renderer doorFrameRenderer;
 
-    // --- 동기화 ---
     [UdonSynced] private bool _isOpen = false;
     [UdonSynced] private bool _isAngry = false;
 
-    // --- 로컬 상태 ---
     private float _openTimer = 0f;
     private float _reactionTimer = 0f;
     private bool _isRinging = false;
-    private bool _bellScored = false; // 이 문에서 점수를 획득했는지
+    private bool _bellScored = false;
     private float _doorAngle = 0f;
     private Vector3 _npcStartPos;
 
@@ -51,21 +55,41 @@ public class DoorController : UdonSharpBehaviour
     {
         if (npcVisual != null) npcVisual.SetActive(false);
         if (npcSpawnPoint != null) _npcStartPos = npcSpawnPoint.position;
+        ApplyFloorDifficulty();
     }
 
-    /// <summary>벨 버튼에서 호출 — 문 열기 시퀀스 시작</summary>
     public void OpenDoor()
     {
         if (_isOpen || _isRinging) return;
+
+        ApplyFloorDifficulty();
 
         _isRinging = true;
         _reactionTimer = reactionDelay;
         _bellScored = false;
     }
 
+    public void ApplyFloorDifficulty()
+    {
+        if (gameManager != null)
+        {
+            difficultyMultiplier = gameManager.GetFloorDifficulty(floorIndex);
+        }
+        else
+        {
+            difficultyMultiplier = Mathf.Max(1f, difficultyMultiplier);
+        }
+
+        reactionDelay = Mathf.Max(0.35f, baseReactionDelay / difficultyMultiplier);
+        openDuration = Mathf.Max(1.25f, baseOpenDuration / Mathf.Sqrt(difficultyMultiplier));
+        detectionRange = Mathf.Max(2f, baseDetectionRange + ((difficultyMultiplier - 1f) * 1.5f));
+        neighborSpeed = Mathf.Max(0.5f, baseNeighborSpeed * difficultyMultiplier);
+
+        ApplyNeighborTrait();
+    }
+
     private void Update()
     {
-        // 벨이 울린 후 딜레이
         if (_isRinging)
         {
             _reactionTimer -= Time.deltaTime;
@@ -77,42 +101,35 @@ public class DoorController : UdonSharpBehaviour
             return;
         }
 
-        // 문이 열려있을 때
         if (_isOpen && !_isAngry)
         {
             _openTimer -= Time.deltaTime;
 
-            // 플레이어 감지 체크
             VRCPlayerApi local = Networking.LocalPlayer;
             if (local != null && npcSpawnPoint != null)
             {
                 float dist = Vector3.Distance(local.GetPosition(), npcSpawnPoint.position);
                 if (dist < detectionRange)
                 {
-                    // 잡혔다! — 주민이 분노 모드
                     SetAngry();
                 }
             }
 
-            // 시간 초과 시 = 벨튀 성공!
             if (_openTimer <= 0f)
             {
                 CloseDoor();
                 if (!_bellScored)
                 {
                     _bellScored = true;
-                    // 성공적으로 벨튀 달성 (점수는 BellButton에서 이미 추가됨)
                 }
             }
         }
 
-        // 분노 모드 — NPC가 플레이어를 추적
         if (_isAngry)
         {
             ChasePlayer();
         }
 
-        // 문 애니메이션
         UpdateDoorAnimation();
     }
 
@@ -134,23 +151,26 @@ public class DoorController : UdonSharpBehaviour
             RequestSerialization();
         }
 
-        // alarm 타입: 주변 문도 열기
         if (neighborType == "alarm")
         {
-            // 부모 오브젝트의 다른 DoorController 검색
-            DoorController[] siblings = transform.parent != null
-                ? transform.parent.GetComponentsInChildren<DoorController>()
-                : new DoorController[0];
+            OpenNearbyDoors();
+        }
+    }
 
-            foreach (var dc in siblings)
+    private void OpenNearbyDoors()
+    {
+        DoorController[] siblings = transform.parent != null
+            ? transform.parent.GetComponentsInChildren<DoorController>()
+            : new DoorController[0];
+
+        foreach (DoorController dc in siblings)
+        {
+            if (dc != null && dc != this && !dc.IsOpen)
             {
-                if (dc != this && !dc.IsOpen)
+                float sibDist = Vector3.Distance(transform.position, dc.transform.position);
+                if (sibDist < 8f)
                 {
-                    float sibDist = Vector3.Distance(transform.position, dc.transform.position);
-                    if (sibDist < 8f) // 8m 이내 이웃
-                    {
-                        dc.OpenDoor();
-                    }
+                    dc.OpenDoor();
                 }
             }
         }
@@ -165,11 +185,9 @@ public class DoorController : UdonSharpBehaviour
             doorAudio.PlayOneShot(neighborAngryClip);
         }
 
-        // stun 타입: 잡지 않고 플레이어를 잠시 멈추게 함
         if (neighborType == "stun")
         {
-            Debug.Log("[BellTui] 🐱 귀여워서 멈칫!");
-            // VRChat에서 플레이어 이동 제한은 제한적 — 시각 효과로 대체
+            Debug.Log("[BellTui] Stun neighbor triggered.");
         }
     }
 
@@ -182,21 +200,19 @@ public class DoorController : UdonSharpBehaviour
         Vector3 npcPos = npcSpawnPoint.position;
         float dist = Vector3.Distance(playerPos, npcPos);
 
-        // NPC 추적 이동
-        if (dist > 1.5f && dist < detectionRange * 2f)
+        if (dist <= 1.5f)
+        {
+            CatchPlayer();
+            return;
+        }
+
+        if (dist < detectionRange * 2f)
         {
             Vector3 dir = (playerPos - npcPos).normalized;
             npcSpawnPoint.position += dir * neighborSpeed * Time.deltaTime;
-
-            // NPC가 플레이어를 잡았을 때
-            if (dist < 1.5f)
-            {
-                CatchPlayer();
-            }
         }
-        else if (dist >= detectionRange * 2f)
+        else
         {
-            // 너무 멀어지면 포기 — 벨튀 성공!
             CloseDoor();
         }
     }
@@ -208,7 +224,7 @@ public class DoorController : UdonSharpBehaviour
             gameManager.ResetCombo();
         }
 
-        Debug.Log("[BellTui] 😱 잡혔다!");
+        Debug.Log("[BellTui] Player caught.");
         CloseDoor();
     }
 
@@ -233,5 +249,32 @@ public class DoorController : UdonSharpBehaviour
         float targetAngle = _isOpen ? -90f : 0f;
         _doorAngle = Mathf.Lerp(_doorAngle, targetAngle, Time.deltaTime * 8f);
         doorPivot.localRotation = Quaternion.Euler(0f, _doorAngle, 0f);
+    }
+
+    private void ApplyNeighborTrait()
+    {
+        if (neighborType == "fast")
+        {
+            neighborSpeed *= 1.35f;
+            reactionDelay *= 0.9f;
+        }
+        else if (neighborType == "far")
+        {
+            detectionRange += 3f;
+        }
+        else if (neighborType == "ghost")
+        {
+            reactionDelay *= 0.8f;
+        }
+        else if (neighborType == "alert")
+        {
+            detectionRange += 1.5f;
+            neighborSpeed *= 1.15f;
+        }
+        else if (neighborType == "throw")
+        {
+            detectionRange += 2f;
+            reactionDelay *= 0.85f;
+        }
     }
 }

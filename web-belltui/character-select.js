@@ -1,25 +1,43 @@
-// Character Select System — 빌런 에이전트 선택 화면
-// Loads character profiles from JSON and manages the selection UI
+// Character Select System - villain agent selection screen.
+// Loads character profiles from JSON and manages the selection UI.
 
 const CHARACTER_PROFILES = {};
 let selectedCharId = 'deathammer';
-let charSelectAnimFrame = 0;
+let characterProfilesLoaded = false;
+let characterProfilesLoading = null;
 
-// Load all character profiles
 async function loadCharacterProfiles() {
   const res = await fetch('characters/characters.json');
   const registry = await res.json();
+
   for (const entry of registry.characters) {
     const cRes = await fetch('characters/' + entry.file);
     CHARACTER_PROFILES[entry.id] = await cRes.json();
   }
+
   selectedCharId = registry.defaultCharacter;
 }
 
-// Build character select UI dynamically
+async function initCharacterProfiles() {
+  if (characterProfilesLoaded) return;
+
+  if (!characterProfilesLoading) {
+    characterProfilesLoading = loadCharacterProfiles().then(() => {
+      characterProfilesLoaded = true;
+      buildCharSelectUI();
+    }).catch(err => {
+      characterProfilesLoading = null;
+      console.error('Failed to load character profiles:', err);
+    });
+  }
+
+  return characterProfilesLoading;
+}
+
 function buildCharSelectUI() {
   const container = document.getElementById('char-cards');
   if (!container) return;
+
   container.innerHTML = '';
 
   Object.values(CHARACTER_PROFILES).forEach(char => {
@@ -42,15 +60,15 @@ function buildCharSelectUI() {
           <div class="char-desc">${char.description}</div>
           <div class="char-stats">
             <div class="stat-row">
-              <span class="stat-label">속도</span>
+              <span class="stat-label">Speed</span>
               <div class="stat-bar"><div class="stat-fill" style="width:${(char.stats.speed / 6) * 100}%;background:${char.color}"></div></div>
             </div>
             <div class="stat-row">
-              <span class="stat-label">체력</span>
+              <span class="stat-label">Lives</span>
               <div class="stat-bar"><div class="stat-fill" style="width:${(char.stats.lives / 4) * 100}%;background:${char.color}"></div></div>
             </div>
             <div class="stat-row">
-              <span class="stat-label">은신</span>
+              <span class="stat-label">Stealth</span>
               <div class="stat-bar"><div class="stat-fill" style="width:${(1 - char.stats.detectionMod + 0.5) * 70}%;background:${char.color}"></div></div>
             </div>
           </div>
@@ -68,7 +86,7 @@ function buildCharSelectUI() {
       card.classList.add('selected');
       selectedCharId = char.id;
       updateCharPreviewGlow(char);
-      // Play select sound
+
       if (typeof snd === 'function') {
         snd(660, 0.08, 'sine', 0.07);
         snd(880, 0.1, 'sine', 0.06, 0.06);
@@ -78,7 +96,6 @@ function buildCharSelectUI() {
     container.appendChild(card);
   });
 
-  // Animate cards in
   setTimeout(() => {
     document.querySelectorAll('.char-card').forEach((c, i) => {
       setTimeout(() => c.classList.add('visible'), i * 120);
@@ -94,9 +111,11 @@ function updateCharPreviewGlow(char) {
   }
 }
 
-// Show character select screen
-function showCharSelect() {
+async function showCharSelect() {
   if (!ac) ia();
+  await initCharacterProfiles();
+
+  document.body.classList.remove('game-active');
   document.getElementById('title').classList.add('hid');
   const cs = document.getElementById('charselect');
   cs.style.display = 'flex';
@@ -106,17 +125,20 @@ function showCharSelect() {
   snd(660, 0.12, 'sine', 0.05, 0.1);
 }
 
-// Start game with selected character
 function startWithChar() {
   const char = CHARACTER_PROFILES[selectedCharId];
-  if (!char) return;
+  if (!char) {
+    initCharacterProfiles().then(startWithChar);
+    return;
+  }
+
   const cs = document.getElementById('charselect');
   cs.classList.add('hid');
   setTimeout(() => { cs.style.display = 'none'; }, 400);
 
-  // Load character-specific sprites then start
   loadCharacterSprites(char, () => {
     startAmb();
+    document.body.classList.add('game-active');
     document.getElementById('over').style.display = 'none';
     document.getElementById('hud').classList.remove('hid');
     G = new Game(char);
@@ -124,12 +146,13 @@ function startWithChar() {
   });
 }
 
-// Load character-specific sprites
 function loadCharacterSprites(char, callback) {
   const spritesToLoad = Object.values(char.sprites);
-  // Filter out already loaded sprites
   const needed = spritesToLoad.filter(s => !SPRITES[s]);
-  if (needed.length === 0) { callback(); return; }
+  if (needed.length === 0) {
+    callback();
+    return;
+  }
 
   let loaded = 0;
   needed.forEach(name => {
@@ -141,17 +164,29 @@ function loadCharacterSprites(char, callback) {
     };
     img.onerror = () => {
       console.warn('Character sprite not found, using fallback:', name);
-      // Fallback to choroki equivalent
-      const fallbackMap = { '_idle': 'choroki_idle', '_run': 'choroki_run_v2', '_bell': 'choroki_bell', '_swing': 'choroki_swing' };
-      for (const [suffix, fallback] of Object.entries(fallbackMap)) {
-        if (name.endsWith(suffix) && SPRITES[fallback]) {
-          SPRITES[name] = SPRITES[fallback];
+      const fallbackMap = {
+        '_idle': 'choroki_idle',
+        '_run': 'choroki_run_v2',
+        '_bell': 'choroki_bell',
+        '_swing': 'choroki_swing'
+      };
+
+      for (const suffix of Object.keys(fallbackMap)) {
+        if (name.endsWith(suffix) && SPRITES[fallbackMap[suffix]]) {
+          SPRITES[name] = SPRITES[fallbackMap[suffix]];
           break;
         }
       }
+
       loaded++;
       if (loaded >= needed.length) callback();
     };
     img.src = 'assets/2d/' + name + '.png';
   });
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initCharacterProfiles);
+} else {
+  initCharacterProfiles();
 }
