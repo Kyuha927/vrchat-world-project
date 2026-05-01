@@ -46,9 +46,9 @@
   <!-- Multiplayer Lobby -->
   <div id="multi-lobby" class="hid" style="display:none">
     <h1>🌐 멀티플레이 로비</h1>
-    <p class="sub">팬들이 아래 코드로 접속합니다</p>
+    <p class="sub">팬들이 아래 코드로 접속합니다 (서버 불필요! 폰끼리 직접 연결)</p>
     <div id="room-code-display" style="font-size:48px;font-weight:800;color:#E94560;letter-spacing:12px;margin:16px 0;text-shadow:0 0 20px rgba(233,69,96,.4)">----</div>
-    <div id="fan-url" class="sub" style="font-size:12px;color:#889">팬 접속 URL: <span id="fan-link">-</span></div>
+    <div id="fan-url" class="sub" style="font-size:12px;color:#889">같은 페이지에서 코드 입력으로 접속</div>
     <div id="fan-list" style="margin:16px 0;padding:12px;background:rgba(255,255,255,.04);border-radius:12px;min-height:60px">
       <p class="sub">대기 중인 팬: <strong id="fan-counter">0</strong>명</p>
       <div id="fan-names" style="font-size:13px;color:#aab"></div>
@@ -87,7 +87,8 @@
   </div>
   <div id="alerts"></div>
 </div>
-<script src="/socket.io/socket.io.js"></script>
+<!-- PeerJS for P2P networking (no server needed!) -->
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <script src="sprites.js"></script>
 <script src="net.js"></script>
 <script src="character-select.js"></script>
