@@ -41,3 +41,9 @@ __pycache__/
 logs/*.log
 !logs/.gitkeep
 # assets/raw/ # We keep them for now as they are small placeholders
+
+# Unity project Library (auto-generated cache)
+unity/Library/
+unity/Temp/
+unity/Logs/
+unity/UserSettings/

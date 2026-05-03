@@ -1,0 +1,55 @@
+wing: vrchat_world
+rooms:
+- name: unity
+  description: Files from unity/
+  keywords:
+  - unity
+  - unity
+- name: design
+  description: Files from design/
+  keywords:
+  - design
+  - design
+- name: belltui_game
+  description: Files from belltui-game/
+  keywords:
+  - belltui_game
+  - belltui-game
+- name: world_spec
+  description: Files from world_spec/
+  keywords:
+  - world_spec
+  - world_spec
+- name: web_belltui
+  description: Files from web-belltui/
+  keywords:
+  - web_belltui
+  - web-belltui
+- name: documentation
+  description: Files from docs/
+  keywords:
+  - documentation
+  - docs
+- name: logs
+  description: Files from logs/
+  keywords:
+  - logs
+  - logs
+- name: scripts
+  description: Files from scripts/
+  keywords:
+  - scripts
+  - scripts
+- name: prompts
+  description: Files from prompts/
+  keywords:
+  - prompts
+  - prompts
+- name: backend
+  description: Files from server/
+  keywords:
+  - backend
+  - server
+- name: general
+  description: Files that don't fit other rooms
+  keywords: []

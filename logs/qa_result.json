@@ -1,0 +1,87 @@
+{
+  "generated_at": "2026-04-29T05:23:04",
+  "status": "PASS",
+  "thresholds": {
+    "total_polygon_limit": 50000,
+    "asset_polygon_limit": 70000,
+    "texture_resolution_limit": 1024
+  },
+  "manifest_path": "/Users/mac/VRChat_World/world_spec/asset_manifest.json",
+  "asset_count": 12,
+  "total_estimated_polygons": 14252,
+  "assets": [
+    {
+      "id": "cyber_door",
+      "poly_budget": 500,
+      "instances": 18,
+      "estimated_polygons": 9000
+    },
+    {
+      "id": "doorbell_button",
+      "poly_budget": 50,
+      "instances": 18,
+      "estimated_polygons": 900
+    },
+    {
+      "id": "hide_box",
+      "poly_budget": 100,
+      "instances": 5,
+      "estimated_polygons": 500
+    },
+    {
+      "id": "cctv_camera",
+      "poly_budget": 200,
+      "instances": 3,
+      "estimated_polygons": 600
+    },
+    {
+      "id": "patrol_drone",
+      "poly_budget": 300,
+      "instances": 3,
+      "estimated_polygons": 900
+    },
+    {
+      "id": "neon_sign_villain",
+      "poly_budget": 4,
+      "instances": 1,
+      "estimated_polygons": 4
+    },
+    {
+      "id": "neon_sign_pc",
+      "poly_budget": 4,
+      "instances": 1,
+      "estimated_polygons": 4
+    },
+    {
+      "id": "neon_sign_chicken",
+      "poly_budget": 4,
+      "instances": 1,
+      "estimated_polygons": 4
+    },
+    {
+      "id": "scoreboard_panel",
+      "poly_budget": 20,
+      "instances": 2,
+      "estimated_polygons": 40
+    },
+    {
+      "id": "corridor_wall_tile",
+      "poly_budget": 50,
+      "instances": 30,
+      "estimated_polygons": 1500
+    },
+    {
+      "id": "elevator_box",
+      "poly_budget": 200,
+      "instances": 4,
+      "estimated_polygons": 800
+    },
+    {
+      "id": "skybox_neon_city",
+      "poly_budget": 0,
+      "instances": 1,
+      "estimated_polygons": 0
+    }
+  ],
+  "warnings": []
+}

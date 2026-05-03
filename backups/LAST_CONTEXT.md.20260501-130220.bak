@@ -1,0 +1,20 @@
+# LAST_CONTEXT - VRChat AI Pipeline
+
+## Last Action
+- World Spec 재작성 완료 (벨튀 아파트 월드)
+- UdonSharp 게임 스크립트 7개 생성 완료
+- AGENTS.md 업데이트 (벨튀 + Quest 최적화 규칙)
+- Codex CLI로 Meshy API 프롬프트 생성 완료
+- Codex CLI 전역 설정 업데이트 (프로젝트 등록)
+
+## Current State
+- World Spec: ✅ 벨튀 전용 (로비→1F→2F→3F→옥상)
+- UdonSharp: ✅ 7개 스크립트 (GameManager, BellButton, DoorController, ScoreBoard, NotorietySystem, HideSpot, FloorElevator)
+- 3D 에셋: ⏳ Meshy API 프롬프트 준비됨 (scripts/meshy_prompts.json)
+- Unity: ❌ 미설치 — VCC + Unity 2022.3.22f1 설치 필요
+
+## Next Step
+- Unity 2022.3.22f1 + VRChat Creator Companion 설치
+- Meshy API로 3D 에셋 생성 (cyber_door, hide_box, cctv_camera, patrol_drone)
+- Unity 프로젝트 생성 & 씬 조립
+- VRChat SDK 빌드 테스트

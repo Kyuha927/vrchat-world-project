@@ -1,16 +1,14 @@
 # LAST_CONTEXT - VRChat AI Pipeline
 
 ## Last Action
-- Project initialized as a Git repository.
-- `.gitignore` created.
-- Initial commit completed.
-- GitHub private repository `Kyuha927/vrchat-world-project` created and pushed.
-- Setup log created in `logs/setup_20260428_015146.log`.
+- `villain-hero-server`를 `/Users/mac/VRChat_World/villain-hero-server`에서 `/Users/mac/villain-hero-server`로 이동 완료
+- 이동 후 `/Users/mac/villain-hero-server/` 상단 목록 확인 완료
+- `/Users/mac/VRChat_World/`에서 `villain` 항목이 더 이상 보이지 않는 것 확인
+- `villain-hero` 관련 MD/JSON/JS 교차 참조 검색 결과 없음 확인
 
 ## Current State
-- Project is synced with GitHub.
-- Scaffold is ready for the AI Pipeline execution.
+- `villain-hero-server`는 VRChat_World 바깥의 `/Users/mac/villain-hero-server`에 위치
+- `/Users/mac/VRChat_World/` top-level에는 villain 관련 디렉터리가 없음
 
 ## Next Step
-- Execute Phase 1: Read `world_spec/world_spec.json` and generate an Implementation Plan for the VRChat world.
-- Start the AI generation process using the prompts in `prompts/`.
+- 추가 작업 없음. 필요하면 새 위치 기준으로 후속 작업을 진행

@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>🎮 벨튀 3D 에셋 뷰어 — Hunyuan3D-2 결과물</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0a0a0f;
+    color: #e0e0e0;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    overflow-x: hidden;
+  }
+  .header {
+    background: linear-gradient(135deg, #1a0a2e 0%, #0d1b2a 50%, #0a2a1a 100%);
+    padding: 20px 30px;
+    border-bottom: 2px solid #00ff8855;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+  .header h1 {
+    font-size: 1.5em;
+    background: linear-gradient(90deg, #00ff88, #00ccff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .header .stats {
+    margin-left: auto;
+    font-size: 0.9em;
+    color: #888;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+    gap: 20px;
+    padding: 20px;
+  }
+  .card {
+    background: #12121a;
+    border: 1px solid #222;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: border-color 0.3s, box-shadow 0.3s;
+  }
+  .card:hover {
+    border-color: #00ff88;
+    box-shadow: 0 0 20px #00ff8822;
+  }
+  .card canvas {
+    width: 100%;
+    height: 300px;
+    display: block;
+    background: #0a0a12;
+    cursor: grab;
+  }
+  .card canvas:active { cursor: grabbing; }
+  .card-info {
+    padding: 12px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid #1a1a2a;
+  }
+  .card-info .name {
+    font-weight: 600;
+    font-size: 1em;
+    color: #00ff88;
+  }
+  .card-info .meta {
+    font-size: 0.8em;
+    color: #666;
+  }
+  .card-info .meta span {
+    margin-left: 10px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: #1a1a2a;
+    color: #aaa;
+  }
+  .loading-msg {
+    text-align: center;
+    padding: 8px;
+    color: #555;
+    font-size: 0.85em;
+  }
+  .error-msg {
+    text-align: center;
+    padding: 20px;
+    color: #ff4444;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🔨 벨튀 3D 에셋 뷰어</h1>
+  <div class="stats" id="stats">로딩 중...</div>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.162.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.162.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+const ASSETS = [
+  { file: 'sledgehammer.glb', name: '🔨 슬레지해머', category: '장비' },
+  { file: 'door_closed.glb', name: '🚪 문 (닫힘)', category: '건축' },
+  { file: 'door_open.glb', name: '🚪 문 (열림)', category: '건축' },
+  { file: 'cctv_camera.glb', name: '📹 CCTV 카메라', category: '소품' },
+  { file: 'npc_guard.glb', name: '👮 경비원', category: 'NPC' },
+  { file: 'npc_auntie.glb', name: '👩 아줌마', category: 'NPC' },
+  { file: 'elevator.glb', name: '🛗 엘리베이터', category: '건축' },
+  { file: 'security_robot.glb', name: '🤖 경비 로봇', category: '소품' },
+  { file: 'npc_cat.glb', name: '🐱 고양이', category: 'NPC' },
+  { file: 'neon_sign.glb', name: '💡 네온 사인', category: '소품' },
+  { file: 'delivery_boxes.glb', name: '📦 택배 박스', category: '소품' },
+];
+
+const grid = document.getElementById('grid');
+const statsEl = document.getElementById('stats');
+let loadedCount = 0;
+let totalTris = 0;
+
+for (const asset of ASSETS) {
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.innerHTML = `
+    <canvas id="c-${asset.file}"></canvas>
+    <div class="card-info">
+      <div class="name">${asset.name}</div>
+      <div class="meta">
+        <span>${asset.category}</span>
+        <span id="tri-${asset.file}">...</span>
+      </div>
+    </div>
+    <div class="loading-msg" id="msg-${asset.file}">⏳ 로딩 중...</div>
+  `;
+  grid.appendChild(card);
+
+  initViewer(asset);
+}
+
+async function initViewer(asset) {
+  const canvas = document.getElementById(`c-${asset.file}`);
+  const msgEl = document.getElementById(`msg-${asset.file}`);
+  const triEl = document.getElementById(`tri-${asset.file}`);
+
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.2;
+
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x0a0a12);
+
+  const camera = new THREE.PerspectiveCamera(45, canvas.clientWidth / canvas.clientHeight, 0.01, 100);
+  camera.position.set(2, 1.5, 2);
+
+  const controls = new OrbitControls(camera, canvas);
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.08;
+  controls.autoRotate = true;
+  controls.autoRotateSpeed = 2;
+
+  // Lighting
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+  scene.add(ambientLight);
+  
+  const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
+  dirLight.position.set(3, 5, 3);
+  scene.add(dirLight);
+  
+  const fillLight = new THREE.DirectionalLight(0x00ff88, 0.3);
+  fillLight.position.set(-3, 2, -3);
+  scene.add(fillLight);
+
+  const rimLight = new THREE.DirectionalLight(0x00ccff, 0.4);
+  rimLight.position.set(0, -2, 4);
+  scene.add(rimLight);
+
+  // Load GLB
+  const loader = new GLTFLoader();
+  try {
+    const gltf = await loader.loadAsync(`./${asset.file}`);
+    const model = gltf.scene;
+    scene.add(model);
+
+    // Auto-fit camera
+    const box = new THREE.Box3().setFromObject(model);
+    const size = box.getSize(new THREE.Vector3());
+    const center = box.getCenter(new THREE.Vector3());
+    
+    const maxDim = Math.max(size.x, size.y, size.z);
+    const dist = maxDim * 2;
+    camera.position.set(dist, dist * 0.7, dist);
+    controls.target.copy(center);
+    controls.update();
+
+    // Count triangles
+    let triangles = 0;
+    let vertices = 0;
+    model.traverse(child => {
+      if (child.isMesh && child.geometry) {
+        const geo = child.geometry;
+        if (geo.index) {
+          triangles += geo.index.count / 3;
+        } else if (geo.attributes.position) {
+          triangles += geo.attributes.position.count / 3;
+        }
+        if (geo.attributes.position) {
+          vertices += geo.attributes.position.count;
+        }
+      }
+    });
+
+    triEl.textContent = `${Math.round(triangles).toLocaleString()} tris`;
+    totalTris += triangles;
+    loadedCount++;
+    msgEl.textContent = `✅ ${vertices.toLocaleString()} verts`;
+    msgEl.style.color = '#00ff88';
+
+    statsEl.textContent = `${loadedCount}/${ASSETS.length} 로드 완료 | 총 ${Math.round(totalTris).toLocaleString()} tris`;
+
+  } catch (err) {
+    msgEl.textContent = `❌ 로드 실패: ${err.message}`;
+    msgEl.style.color = '#ff4444';
+    console.error(`Failed to load ${asset.file}:`, err);
+    return;
+  }
+
+  // Render loop
+  function animate() {
+    requestAnimationFrame(animate);
+    controls.update();
+    renderer.render(scene, camera);
+  }
+  animate();
+
+  // Resize
+  const resizeObserver = new ResizeObserver(() => {
+    const w = canvas.clientWidth;
+    const h = canvas.clientHeight;
+    renderer.setSize(w, h);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+  });
+  resizeObserver.observe(canvas);
+}
+</script>
+
+</body>
+</html>

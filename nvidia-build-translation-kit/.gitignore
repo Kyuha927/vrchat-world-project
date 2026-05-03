@@ -1,0 +1,20 @@
+.env
+.env.*
+!.env.example
+__pycache__/
+*.pyc
+
+# Runtime data and outputs stay local.
+data/raw/*
+data/chapters/*
+data/translated/*
+data/chapter_state.json
+!data/raw/.gitkeep
+!data/chapters/.gitkeep
+!data/translated/.gitkeep
+
+# Do not commit private inputs/exports.
+*.zip
+*.7z
+*.rar
+*.log
